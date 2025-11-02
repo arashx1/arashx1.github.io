@@ -3,63 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculator or Game</title>
+<title>Arash's Dynamic Site</title>
 <style>
   body {
-    font-family: Poppins, sans-serif;
-    background: linear-gradient(135deg, #89f7fe, #66a6ff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
     margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Poppins, sans-serif;
+    background: radial-gradient(circle at center, #a8e6ff, #4b7bec);
+    position: relative;
+    cursor: crosshair;
   }
-  .container {
+
+  #shadow {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(white 10%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.6;
+    filter: blur(40px);
+    transition: transform 0.05s linear;
+  }
+
+  .welcome {
+    position: absolute;
+    left: 50%;
+    top: 15%;
+    transform: translateX(-50%);
     text-align: center;
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    color: white;
   }
+
+  .welcome h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+  }
+
   button {
-    padding: 10px 20px;
-    font-size: 18px;
-    margin: 10px;
+    padding: 12px 25px;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
     background: #007bff;
     color: white;
+    font-size: 18px;
+    cursor: pointer;
     transition: 0.3s;
   }
-  button:hover { background: #0056b3; }
-  #calcSection, #gameSection { display: none; }
-  .game-area {
-    width: 300px; height: 400px;
-    background: #222; border-radius: 10px;
-    position: relative; overflow: hidden;
+  button:hover {
+    background: #0056b3;
   }
-  .bubble {
-    width: 25px; height: 25px;
-    border-radius: 50%;
+
+  /* Calculator on right side */
+  #calcSection {
     position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.9);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    display: none;
   }
+
+  #calcSection input {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    text-align: right;
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  #calcSection .keys button {
+    width: 50px;
+    height: 50px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    background: #eee;
+    transition: 0.3s;
+  }
+
+  #calcSection .keys button:hover {
+    background: #d0d0d0;
+  }
+
+  #calcSection .special {
+    background: #ff5c5c;
+    color: white;
+  }
+
+  /* Cannon area */
+  #cannonCanvas {
+    position: absolute;
+    left: 50%;
+    bottom: 60px;
+    transform: translateX(-50%);
+    border-radius: 10px;
+  }
+
 </style>
 </head>
 <body>
 
-<div class="container" id="welcome">
-  <h1>Welcome!</h1>
-  <p>Would you like to open the calculator or play a game?</p>
+<div id="shadow"></div>
+
+<div class="welcome" id="welcome">
+  <h1>Hello, I'm Arash 👋</h1>
   <button onclick="showCalc()">🧮 Open Calculator</button>
-  <button onclick="showGame()">🎯 Play Bubble Game</button>
 </div>
 
-<div class="container" id="calcSection">
-  <h2>Simple Calculator</h2>
-  <input type="text" id="display" readonly style="width: 90%; padding: 10px; font-size: 18px;">
-  <br><br>
-  <div>
+<div id="calcSection">
+  <input type="text" id="display" readonly>
+  <div class="keys">
     <button onclick="add('1')">1</button>
     <button onclick="add('2')">2</button>
     <button onclick="add('3')">3</button>
@@ -75,35 +136,28 @@
     <button onclick="add('0')">0</button>
     <button onclick="add('.')">.</button>
     <button onclick="calculate()">=</button>
-    <button onclick="add('/')">/</button><br><br>
-    <button onclick="clearDisplay()" style="background:#ff3b3b;">C</button>
-    <button onclick="goHome()" style="background:gray;">🏠 Home</button>
+    <button onclick="add('/')">/</button><br>
+    <button class="special" onclick="clearDisplay()">C</button>
+    <button onclick="goHome()" style="background:gray; color:white;">🏠</button>
   </div>
 </div>
 
-<div class="container" id="gameSection">
-  <h2>Bubble Shooter (Mini)</h2>
-  <div class="game-area" id="gameArea"></div><br>
-  <button onclick="spawnBubble()">Shoot Bubble</button>
-  <button onclick="goHome()" style="background:gray;">🏠 Home</button>
-</div>
+<canvas id="cannonCanvas" width="800" height="400"></canvas>
 
 <script>
+  // Glow shadow follows cursor
+  const shadow = document.getElementById('shadow');
+  document.addEventListener('mousemove', (e) => {
+    shadow.style.transform = `translate(${e.clientX - 60}px, ${e.clientY - 60}px)`;
+  });
+
+  // Calculator logic
   function showCalc() {
-    document.getElementById('welcome').style.display = 'none';
     document.getElementById('calcSection').style.display = 'block';
-  }
-  function showGame() {
-    document.getElementById('welcome').style.display = 'none';
-    document.getElementById('gameSection').style.display = 'block';
   }
   function goHome() {
     document.getElementById('calcSection').style.display = 'none';
-    document.getElementById('gameSection').style.display = 'none';
-    document.getElementById('welcome').style.display = 'block';
   }
-
-  // Calculator
   function add(val) {
     document.getElementById('display').value += val;
   }
@@ -118,27 +172,62 @@
     }
   }
 
-  // Bubble Game
-  function spawnBubble() {
-    const area = document.getElementById('gameArea');
-    const bubble = document.createElement('div');
-    bubble.classList.add('bubble');
-    bubble.style.background = `hsl(${Math.random()*360}, 80%, 60%)`;
-    bubble.style.left = Math.random() * 270 + 'px';
-    bubble.style.bottom = '0px';
-    area.appendChild(bubble);
-    
-    let pos = 0;
-    const move = setInterval(() => {
-      if (pos >= 400) {
-        clearInterval(move);
-        area.removeChild(bubble);
-      } else {
-        pos += 5;
-        bubble.style.bottom = pos + 'px';
-      }
-    }, 20);
+  // Cannon physics
+  const canvas = document.getElementById('cannonCanvas');
+  const ctx = canvas.getContext('2d');
+  const gravity = 0.4;
+  const balls = [];
+  const cannon = { x: 400, y: 380, angle: -Math.PI / 4 };
+
+  document.addEventListener('click', shootBall);
+
+  function shootBall() {
+    const speed = 10;
+    const ball = {
+      x: cannon.x + Math.cos(cannon.angle) * 30,
+      y: cannon.y + Math.sin(cannon.angle) * 30,
+      vx: Math.cos(cannon.angle) * speed,
+      vy: Math.sin(cannon.angle) * speed,
+      r: 10
+    };
+    balls.push(ball);
   }
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw cannon
+    ctx.save();
+    ctx.translate(cannon.x, cannon.y);
+    ctx.rotate(cannon.angle);
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, -5, 40, 10);
+    ctx.restore();
+
+    // Update and draw balls
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+      b.vy += gravity;
+      b.x += b.vx;
+      b.y += b.vy;
+
+      if (b.y + b.r > canvas.height) {
+        b.y = canvas.height - b.r;
+        b.vy *= -0.6;
+        b.vx *= 0.8;
+      }
+
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'white';
+      ctx.shadowBlur = 20;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(update);
+  }
+  update();
 </script>
 
 </body>
