@@ -1,24 +1,172 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to Arash's Website</title>
-  <meta name="description" content="My first free website built with GitHub Pages.">
+  <meta name="description" content="Dynamic website built with GitHub Pages by Arash.">
   <style>
+    /* General styling */
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Poppins", sans-serif;
       text-align: center;
-      padding-top: 100px;
-      background-color: #fafafa;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
       color: #333;
+      overflow-x: hidden;
+      height: 100vh;
+      margin: 0;
     }
+
     h1 {
-      color: #0070f3;
+      color: #0066ff;
+      margin-top: 100px;
+      font-size: 2.5rem;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    p {
+      font-size: 1.2rem;
+      animation: fadeIn 3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Calculator popup button */
+    .open-btn {
+      background-color: #0070f3;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 30px;
+      transition: background 0.3s;
+    }
+
+    .open-btn:hover {
+      background-color: #005ad3;
+    }
+
+    /* Popup calculator box */
+    .calculator {
+      position: fixed;
+      bottom: -400px;
+      right: 20px;
+      width: 260px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: bottom 0.5s ease;
+      padding: 15px;
+    }
+
+    .calculator.show {
+      bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      text-align: right;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .btns button {
+      width: 23%;
+      margin: 1%;
+      padding: 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #e6e6e6;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btns button:hover {
+      background: #d1d1d1;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      animation: float 10s infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-800px); opacity: 0; }
     }
   </style>
 </head>
+
 <body>
   <h1>Hello, I'm Arash 👋</h1>
-  <p>Welcome to my website hosted for free on GitHub Pages!</p>
+  <p>Welcome to my dynamic website built with GitHub Pages!</p>
+  <button class="open-btn" onclick="toggleCalc()">🧮 Open Calculator</button>
+
+  <div class="calculator" id="calc">
+    <input type="text" id="display" disabled />
+    <div class="btns">
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('/')">÷</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('*')">×</button>
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('-')">−</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button onclick="calcResult()">=</button>
+      <button onclick="append('+')">+</button>
+      <button onclick="clearDisplay()" style="width:98%;background:#ff6666;color:white;">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const calc = document.getElementById('calc');
+    const display = document.getElementById('display');
+
+    function toggleCalc() {
+      calc.classList.toggle('show');
+    }
+
+    function append(val) {
+      display.value += val;
+    }
+
+    function calcResult() {
+      try { display.value = eval(display.value); }
+      catch { display.value = "Error"; }
+    }
+
+    function clearDisplay() {
+      display.value = '';
+    }
+
+    // ASMR bubble effect
+    for (let i = 0; i < 15; i++) {
+      let bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.style.width = bubble.style.height = Math.random()*60 + 10 + 'px';
+      bubble.style.left = Math.random()*100 + 'vw';
+      bubble.style.animationDuration = (5 + Math.random()*10) + 's';
+      bubble.style.animationDelay = Math.random()*5 + 's';
+      document.body.appendChild(bubble);
+    }
+  </script>
 </body>
 </html>
