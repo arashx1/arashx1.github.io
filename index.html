@@ -1,723 +1,271 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Arash — Realistic Cannon (Optimized)</title>
-<style>
-  :root{
-    --bg-top:#0b1220;
-    --bg-mid:#122033;
-    --accent:#7ec7ff;
-    --glass: rgba(255,255,255,0.06);
-    --glass-border: rgba(255,255,255,0.08);
-    --text: #eaf6ff;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-top),var(--bg-mid));font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:var(--text);-webkit-font-smoothing:antialiased}
-  body{overflow:hidden;}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arash’s Dynamic Cannon</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* ROOT */
-  #root{position:relative;width:100%;height:100vh;}
+    body {
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      background: radial-gradient(circle at top left, #0a0a0a, #000);
+    }
 
-/* Top controls */
-  .topbar{position:absolute;left:16px;top:12px;z-index:50;display:flex;gap:8px}
-  .btn{background:linear-gradient(180deg,#5ec0ff,#3b8cff);border:none;padding:10px 14px;border-radius:10px;color:#061026;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.35)}
-  .btn.secondary{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.06);box-shadow:none}
+    #canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
 
-/* HUD */
-  .hud{position:absolute;right:18px;top:12px;z-index:50;display:flex;gap:10px;align-items:center}
-  .hud .score{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.25)}
+    #calcButton {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: 0.3s;
+    }
+    #calcButton:hover {
+      background: rgba(255,255,255,0.2);
+    }
 
-/* greeting */
-  .greet{position:absolute;left:50%;top:8%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:40}
-  .greet h1{margin:0;font-size:28px}
-  .greet p{margin:6px 0 0 0;color:rgba(230,245,255,0.85);font-size:13px}
-
-/* cursor glow */
-  #cursorGlow{
-    position:fixed;width:120px;height:120px;border-radius:50%;pointer-events:none;
-    background:radial-gradient(circle at 40% 30%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.25) 12%, rgba(255,255,255,0.06) 30%, transparent 60%);
-    filter:blur(24px);opacity:0.85;transform:translate(-9999px,-9999px);z-index:45;transition:transform .04s linear;
-  }
-
-/* calculator (glass) */
-  .calculator{
-    position:absolute;right:18px;top:80px;width:300px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    border:1px solid var(--glass-border);z-index:60;backdrop-filter: blur(8px);box-shadow:0 20px 50px rgba(0,0,0,0.6)
-  }
-  .calc-head{display:flex;justify-content:space-between;align-items:center}
-  .calc-title{font-weight:800}
-  .calc-close{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px 8px;color:var(--text);border-radius:8px;cursor:pointer}
-  .calc-screen{height:56px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:flex-end;padding:8px 12px;font-size:22px;color:var(--text);box-shadow:inset 0 -6px 18px rgba(0,0,0,0.4);margin-top:8px}
-  .calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-  .key{padding:12px;border-radius:8px;border:none;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:var(--text);font-weight:700;cursor:pointer}
-  .key.op{background:linear-gradient(180deg,#57d4a8,#3bc48d);color:#041026}
-  .key.clear{background:linear-gradient(180deg,#ff6b6b,#ff5a5a);color:white;grid-column:span 2}
-
-/* canvas placement */
-  canvas{display:block;position:absolute;left:50%;bottom:32px;transform:translateX(-50%);z-index:30;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.35)}
-
-/* small note */
-  .note{position:absolute;left:18px;bottom:18px;color:rgba(255,255,255,0.9);z-index:40;font-size:13px}
-
-/* responsive */
-  @media (max-width:820px){
-    .calculator{right:12px;top:72px;width:260px}
-    canvas{width:calc(100% - 40px)}
-    .hud{display:none}
-    .greet h1{font-size:20px}
-  }
-</style>
+    #calculator {
+      display: none;
+      position: fixed;
+      right: 20px;
+      top: 70px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 15px;
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      width: 260px;
+      color: white;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    #calculator input {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    #calculator button {
+      width: 60px;
+      height: 50px;
+      margin: 5px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #calculator button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
 </head>
 <body>
-  <div id="root">
-    <div class="topbar">
-      <button class="btn" id="toggleCalcBtn">Toggle Calculator (C)</button>
-      <button class="btn secondary" id="clearBtn">Clear</button>
-      <button class="btn secondary" id="resetBtn">Reset</button>
+  <canvas id="canvas"></canvas>
+  <button id="calcButton">🧮 Calculator</button>
+
+  <div id="calculator">
+    <input type="text" id="display" disabled>
+    <div>
+      <button onclick="appendValue('7')">7</button>
+      <button onclick="appendValue('8')">8</button>
+      <button onclick="appendValue('9')">9</button>
+      <button onclick="appendValue('/')">÷</button>
     </div>
-
-    <div class="hud"><div class="score">Score: <span id="score">0</span></div></div>
-
-    <div class="greet"><h1>Hello, I'm Arash 👋</h1><p>Move mouse to aim. Hold to charge, release to fire. Click works too.</p></div>
-
-    <div id="cursorGlow" aria-hidden="true"></div>
-
-    <div class="note">Tip: Avoid clicking UI to shoot. Toggle calc with <strong>C</strong></div>
-
-    <div class="calculator" id="calculator" role="dialog" aria-label="Calculator">
-      <div class="calc-head">
-        <div class="calc-title">Calculator</div>
-        <button class="calc-close" id="hideCalc">Hide</button>
-      </div>
-      <div class="calc-screen" id="calcScreen">0</div>
-      <div class="calc-keys" id="calcKeys">
-        <button class="key" data-key="7">7</button>
-        <button class="key" data-key="8">8</button>
-        <button class="key" data-key="9">9</button>
-        <button class="key" data-key="/">÷</button>
-
-        <button class="key" data-key="4">4</button>
-        <button class="key" data-key="5">5</button>
-        <button class="key" data-key="6">6</button>
-        <button class="key" data-key="*">×</button>
-
-        <button class="key" data-key="1">1</button>
-        <button class="key" data-key="2">2</button>
-        <button class="key" data-key="3">3</button>
-        <button class="key" data-key="-">−</button>
-
-        <button class="key" data-key="0">0</button>
-        <button class="key" data-key=".">.</button>
-        <button class="key op" data-key="=">=</button>
-        <button class="key" data-key="+">+</button>
-
-        <button class="key clear" data-key="C">Clear</button>
-        <button class="key" data-key="H">Home</button>
-      </div>
+    <div>
+      <button onclick="appendValue('4')">4</button>
+      <button onclick="appendValue('5')">5</button>
+      <button onclick="appendValue('6')">6</button>
+      <button onclick="appendValue('*')">×</button>
     </div>
-
-    <!-- Canvas (will be sized by JS) -->
-    <canvas id="canvas" width="1100" height="520" aria-label="Interactive canvas"></canvas>
+    <div>
+      <button onclick="appendValue('1')">1</button>
+      <button onclick="appendValue('2')">2</button>
+      <button onclick="appendValue('3')">3</button>
+      <button onclick="appendValue('-')">−</button>
+    </div>
+    <div>
+      <button onclick="appendValue('0')">0</button>
+      <button onclick="appendValue('.')">.</button>
+      <button onclick="calculate()">=</button>
+      <button onclick="appendValue('+')">+</button>
+    </div>
+    <div>
+      <button style="width: 95%" onclick="clearDisplay()">C</button>
+    </div>
   </div>
 
-<script>
-/*
-  Optimized single-file interactive playground
-  - Mouse aim cannon
-  - Hold-to-charge and release-to-fire
-  - Realistic ball physics + bursting fragments on hard impacts
-  - Particle pooling & caps for performance
-  - Calculator toggle and keys
-  - No day/night mode (removed to stop lag)
-*/
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let W = window.innerWidth, H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
 
-/* --------- Utility functions ---------- */
-const rand = (a,b) => Math.random()*(b-a)+a;
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-const now = () => performance.now();
+    // Physics settings
+    const gravity = 0.4;
+    const friction = 0.99;
 
-/* --------- DOM refs ---------- */
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const cursorGlow = document.getElementById('cursorGlow');
-const calcEl = document.getElementById('calculator');
-const toggleCalcBtn = document.getElementById('toggleCalcBtn');
-const hideCalc = document.getElementById('hideCalc');
-const calcKeys = document.getElementById('calcKeys');
-const calcScreen = document.getElementById('calcScreen');
-const clearBtn = document.getElementById('clearBtn');
-const resetBtn = document.getElementById('resetBtn');
-const scoreEl = document.getElementById('score');
+    let cannon = { x: 100, y: H - 100, angle: 0 };
+    let balls = [];
 
-/* --------- Display / state ---------- */
-let DPR = Math.max(1, window.devicePixelRatio || 1);
-let W = 1100, H = 520;
-let mouse = { x: W/2, y: H/2, down:false, holdStart:0 };
-let lastMouseMove = Date.now();
-let balls = [];       // active cannonballs
-let fragments = [];   // shards from burst (physics too)
-let particles = [];   // small sparks/poofs
-let fireflies = [];   // background ambient dots
-let score = 0;
-let cannon = { x: W/2, y: H-66, angle:-Math.PI/4, length:52, radius:20 };
-
-/* Performance caps */
-const MAX_FRAGMENTS = 600;
-const MAX_PARTICLES = 800;
-const MAX_BALLS = 18;
-
-/* Physics params — tweak these for feel */
-const PHYS = {
-  gravity: 0.52,        // gravity
-  airDrag: 0.998,       // mild air drag per tick
-  bounceRest: 0.58,     // bounce restitution
-  groundFriction: 0.86, // when rolling on ground
-  fragmentDrag: 0.993,
-  particleDrag: 0.985
-};
-
-/* Canvas resize */
-function resize(){
-  const maxW = Math.min(window.innerWidth - 80, 1400);
-  const cw = Math.max(680, maxW);
-  const ch = Math.min(680, Math.max(420, window.innerHeight - 160));
-  W = Math.floor(cw);
-  H = Math.floor(ch);
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-  canvas.width = Math.floor(W * DPR);
-  canvas.height = Math.floor(H * DPR);
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  // position cannon relative to new size
-  cannon.x = W/2;
-  cannon.y = H - 66;
-}
-window.addEventListener('resize', resize);
-
-/* init ambient fireflies */
-function initFireflies(n=20){
-  fireflies = [];
-  for(let i=0;i<n;i++){
-    fireflies.push({
-      x: rand(40, W-40),
-      y: rand(40, H*0.45),
-      r: rand(1.2,3.4),
-      phase: rand(0, Math.PI*2),
-      hue: rand(160,340),
-      drift: rand(-0.06,0.06),
-      speed: rand(0.01,0.08)
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W; canvas.height = H;
+      cannon.y = H - 100;
     });
-  }
-}
 
-/* --------- Entity factories ---------- */
-function createBall(x,y,vx,vy,r=10,color='#fff'){
-  return { x,y,vx,vy,r,color,trail:[],age:0,settled:0 };
-}
-function createFragment(x,y,vx,vy,r,color,life=900){
-  return { x,y,vx,vy,r,color,life,age:0 };
-}
-function createParticle(x,y,vx,vy,life=400,r=1.5,color='#ffd6a8'){
-  return { x,y,vx,vy,life,age:0,r,color };
-}
+    // Handle mouse aiming and shooting
+    let mouse = { x: 0, y: 0 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      cannon.angle = Math.atan2(mouse.y - cannon.y, mouse.x - cannon.x);
+    });
+    window.addEventListener('click', () => shoot());
 
-/* Spawn a cannonball (power controls speed) */
-function spawnBall(power=12){
-  if(balls.length > MAX_BALLS) return; // cap active cannonballs for perf
-  const ang = cannon.angle;
-  const sx = cannon.x + Math.cos(ang) * (cannon.length + 8);
-  const sy = cannon.y + Math.sin(ang) * (cannon.length + 8);
-  const speed = power * (0.9 + Math.random()*0.32);
-  const vx = Math.cos(ang)*speed + rand(-0.7,0.7);
-  const vy = Math.sin(ang)*speed + rand(-0.7,0.7);
-  const color = ['#ffffff','#fff6e6','#bff7ff','#ffd6f5','#b9ffde'][Math.floor(rand(0,5))];
-  balls.push(createBall(sx,sy,vx,vy, rand(8,12), color));
-  // small muzzle particles
-  for(let i=0;i<6;i++){
-    particles.push(createParticle(sx,sy, Math.cos(ang+rand(-0.6,0.6))*rand(1.6,4.6), Math.sin(ang+rand(-0.6,0.6))*rand(1.6,4.6), 220 + rand(0,220), rand(1,2.4), '#ffd6a8'));
-  }
-}
-
-/* Bursting: create fragments from a ball */
-function burstBall(ball){
-  // estimate impact force from vertical velocity
-  const impact = Math.abs(ball.vy);
-  // number fragments depending on speed (cap)
-  const fragCount = Math.min(24 + Math.floor(impact*3), 60);
-  // prevent fragment explosion overload
-  const allowed = Math.max(0, MAX_FRAGMENTS - fragments.length);
-  const spawnCount = Math.min(fragCount, allowed);
-  for(let i=0;i<spawnCount;i++){
-    const ang = rand(0, Math.PI*2);
-    // speed scatter scaled with impact
-    const sp = rand(0.8, 2.4) + impact * rand(0.2,0.6);
-    const fx = ball.x + Math.cos(ang) * rand(0, ball.r*0.6);
-    const fy = ball.y + Math.sin(ang) * rand(0, ball.r*0.6);
-    fragments.push(createFragment(fx, fy, Math.cos(ang)*sp + ball.vx*0.14, Math.sin(ang)*sp + ball.vy*0.14, rand(1.2,3.6), shadeColor(ball.color, rand(-12,6)), 1200 + rand(0,600)));
-  }
-  // add some soft particles / sparks
-  for(let p=0;p<10;p++){
-    particles.push(createParticle(ball.x + rand(-6,6), ball.y + rand(-6,6), rand(-2,2)+ball.vx*0.3, rand(-2,2)+ball.vy*0.3, 260+rand(0,260), rand(0.6,1.8), '#ffd6a8'));
-  }
-}
-
-/* ---------- Physics update (dt in ms relative scale) ---------- */
-function updatePhysics(dt){
-  // dt normalized such that dt ~ 1 per frame at ~60 FPS (i.e. dt = elapsed / (1000/60))
-  // gravity and motions applied accordingly
-  for(let i=balls.length-1;i>=0;i--){
-    const b = balls[i];
-    // gravity (scaled)
-    b.vy += PHYS.gravity * dt;
-    // air drag
-    b.vx *= Math.pow(PHYS.airDrag, dt);
-    b.vy *= Math.pow(PHYS.airDrag, dt);
-    // position
-    b.x += b.vx * dt;
-    b.y += b.vy * dt;
-    b.age += dt;
-
-    // trail
-    if(b.age % 2 < 1) b.trail.push({ x:b.x, y:b.y, t:220 });
-    if(b.trail.length > 22) b.trail.shift();
-
-    // ground collision
-    const groundY = H - 18;
-    if(b.y + b.r >= groundY){
-      // collision energy / impulse
-      // place exactly on ground
-      b.y = groundY - b.r;
-      // invert vertical with damping
-      const incoming = Math.abs(b.vy);
-      b.vy *= -PHYS.bounceRest;
-      // horizontal friction on bounce
-      b.vx *= PHYS.groundFriction;
-
-      // if impact was strong -> burst
-      if(incoming > 8.5){
-        // spawn fragments and remove ball
-        burstBall(b);
-        balls.splice(i,1);
-        continue;
-      } else {
-        // small settle behavior; if slow, reduce and eventually remove
-        if(Math.abs(b.vy) < 0.8 && Math.abs(b.vx) < 0.3){
-          b.settled += dt;
-          // gradually slow rolling
-          b.vx *= 0.92;
-          if(b.settled > 500 + Math.random()*200){
-            // small puff and remove
-            for(let p=0;p<6;p++) particles.push(createParticle(b.x + rand(-4,4), b.y + rand(-2,2), rand(-1.2,1.2), rand(-1.2, -0.2), 200 + rand(0,140), rand(0.8,1.8), '#dff6ff'));
-            balls.splice(i,1);
-            continue;
-          }
-        } else {
-          b.settled = 0;
-        }
-      }
+    function shoot() {
+      const speed = 20;
+      const vx = Math.cos(cannon.angle) * speed;
+      const vy = Math.sin(cannon.angle) * speed;
+      balls.push({
+        x: cannon.x + 80 * Math.cos(cannon.angle),
+        y: cannon.y + 80 * Math.sin(cannon.angle),
+        vx: vx,
+        vy: vy,
+        r: 12,
+        life: 1
+      });
     }
-    // remove if offscreen too far
-    if(b.x < -200 || b.x > W + 200 || b.y > H + 400) balls.splice(i,1);
-  }
 
-  // fragments physics
-  for(let i=fragments.length-1;i>=0;i--){
-    const f = fragments[i];
-    f.vy += PHYS.gravity * dt * 0.6; // lighter gravity for tiny shards
-    f.vx *= Math.pow(PHYS.fragmentDrag, dt);
-    f.vy *= Math.pow(PHYS.fragmentDrag, dt);
-    f.x += f.vx * dt;
-    f.y += f.vy * dt;
-    f.age += dt;
-    if(f.age > f.life) { fragments.splice(i,1); continue; }
-    // ground collision with fragments: simple bounce & settle
-    if(f.y + f.r >= H - 18){
-      f.y = H - 18 - f.r;
-      f.vy *= -0.35;
-      f.vx *= 0.75;
-      // friction small
-      if(Math.abs(f.vy) < 0.3 && Math.abs(f.vx) < 0.3){
-        // slow down and fade quickly
-        f.vx *= 0.6;
-        f.vy = 0;
-        f.age += dt * 2; // speed up aging when settled
-      }
-    }
-  }
+    function drawCannon() {
+      ctx.save();
+      ctx.translate(cannon.x, cannon.y);
+      ctx.rotate(cannon.angle);
+      ctx.fillStyle = '#0ff';
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = '#0ff';
+      ctx.fillRect(0, -10, 80, 20);
+      ctx.restore();
 
-  // particles physics
-  for(let i=particles.length-1;i>=0;i--){
-    const p = particles[i];
-    p.vy += (PHYS.gravity * 0.3) * dt;
-    p.vx *= Math.pow(PHYS.particleDrag, dt);
-    p.vy *= Math.pow(PHYS.particleDrag, dt);
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.age += dt;
-    if(p.age > p.life) particles.splice(i,1);
-    // ground collision small fade
-    if(p.y > H - 18) p.y = H - 18;
-  }
-
-  // fireflies
-  for(const f of fireflies){
-    f.phase += f.speed * dt * 0.06;
-    f.x += f.drift * dt;
-    f.y += Math.sin(f.phase) * f.speed * 0.8 * dt;
-    if(f.x < 12) f.x = W - 36;
-    if(f.x > W - 12) f.x = 24;
-  }
-
-  // cap arrays (safety)
-  if(fragments.length > MAX_FRAGMENTS) fragments.splice(0, fragments.length - MAX_FRAGMENTS);
-  if(particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
-}
-
-/* ---------- Drawing ---------- */
-function clear(){
-  ctx.clearRect(0,0,W,H);
-}
-function drawBackground(){
-  // simplified static gradient (no per-frame heavy blending)
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, '#081024');
-  g.addColorStop(1, '#0f2140');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
-
-  // subtle soft blobs near top for depth (cheap)
-  ctx.globalAlpha = 0.06;
-  softBlob(W*0.5 - 100, 60, W*0.55, 140, 5);
-  softBlob(W*0.5 + 110, 40, W*0.6, 160, 5);
-  ctx.globalAlpha = 1;
-}
-function softBlob(ox, oy, w, h, steps){
-  for(let s=0;s<steps;s++){
-    const alpha = (1 - s/steps) * 0.06;
-    ctx.beginPath();
-    ctx.ellipse(ox + Math.sin(s)*8, oy + Math.cos(s)*6, w*(0.8 - s/steps*0.5), h*(0.9 - s/steps*0.6), 0, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-    ctx.fill();
-  }
-}
-function drawFireflies(){
-  for(const f of fireflies){
-    ctx.globalCompositeOperation = 'lighter';
-    const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 30);
-    grad.addColorStop(0, `hsla(${f.hue},95%,70%,0.95)`);
-    grad.addColorStop(0.3, `hsla(${f.hue},95%,60%,0.28)`);
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, f.r*5 + Math.abs(Math.sin(f.phase))*6, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-  }
-}
-function drawGround(){
-  const gy = H - 18;
-  const grd = ctx.createLinearGradient(0, gy, 0, H);
-  grd.addColorStop(0, 'rgba(0,0,0,0.24)');
-  grd.addColorStop(1, 'rgba(0,0,0,0.88)');
-  ctx.fillStyle = grd;
-  ctx.fillRect(0, gy, W, 18);
-  // subtle ground line
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  ctx.fillRect(0, gy-2, W, 2);
-}
-function drawCannon(){
-  // smooth rotation toward mouse
-  const target = Math.atan2(mouse.y - cannon.y, mouse.x - cannon.x);
-  // clamp angle so barrel points above ground only
-  const minA = -Math.PI + 0.3;
-  const maxA = -0.18;
-  let clamped = target;
-  if(clamped < -Math.PI) clamped += Math.PI*2;
-  clamped = Math.max(minA, Math.min(maxA, clamped));
-  cannon.angle += (clamped - cannon.angle) * 0.22;
-
-  ctx.save();
-  ctx.translate(cannon.x, cannon.y);
-  ctx.rotate(cannon.angle);
-
-  // barrel shadow
-  ctx.fillStyle = '#09131c';
-  roundRect(ctx, -8, -14, cannon.length + 36, 30, 12);
-  ctx.fill();
-
-  // barrel main gradient
-  const g = ctx.createLinearGradient(0, -12, cannon.length+36, 12);
-  g.addColorStop(0, '#1b2a36');
-  g.addColorStop(0.6, '#3b5868');
-  g.addColorStop(1, '#0b1220');
-  ctx.fillStyle = g;
-  roundRect(ctx, -6, -12, cannon.length + 26, 24, 10);
-  ctx.fill();
-
-  // muzzle subtle white front
-  ctx.globalAlpha = 0.06;
-  roundRect(ctx, cannon.length+8, -10, 18, 20, 8);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.restore();
-
-  // base discs
-  ctx.beginPath();
-  ctx.fillStyle = '#0b1620';
-  ctx.arc(cannon.x, cannon.y, cannon.radius + 6, 0, Math.PI*2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.fillStyle = '#0b1420';
-  ctx.arc(cannon.x, cannon.y, cannon.radius, 0, Math.PI*2);
-  ctx.fill();
-}
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
-
-/* draw trails, balls, fragments, particles in that z-order */
-function drawBalls(){
-  // trails behind balls
-  for(const b of balls){
-    // trail glows
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    for(const t of b.trail){
-      const alpha = clamp(t.t / 220, 0, 1) * 0.38;
-      const rr = Math.max(1.6, (t.t/220)*8);
-      const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, rr*3);
-      grad.addColorStop(0, hexToRgba(b.color, alpha));
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(t.x, t.y, rr, 0, Math.PI*2);
+      ctx.arc(cannon.x, cannon.y, 25, 0, Math.PI * 2);
+      ctx.fillStyle = '#222';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#0ff';
       ctx.fill();
     }
-    ctx.restore();
-  }
 
-  // main balls
-  for(const b of balls){
-    ctx.beginPath();
-    ctx.fillStyle = b.color;
-    ctx.shadowColor = b.color;
-    ctx.shadowBlur = 22;
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  }
-}
-function drawFragments(){
-  for(const f of fragments){
-    const alpha = 1 - (f.age / f.life);
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.fillStyle = f.color;
-    ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
-function drawParticles(){
-  for(const p of particles){
-    const a = 1 - (p.age / p.life);
-    ctx.globalAlpha = a;
-    ctx.beginPath();
-    ctx.fillStyle = p.color;
-    ctx.arc(p.x, p.y, p.r * (1 + (1-a)), 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  }
-}
+    function drawBalls() {
+      for (let i = 0; i < balls.length; i++) {
+        const b = balls[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.vy += gravity;
+        b.vx *= friction;
+        b.vy *= friction;
 
-/* helper to convert hex to rgba string w alpha */
-function hexToRgba(hex, alpha=1){
-  try {
-    const c = hex.replace('#','');
-    const i = parseInt(c,16);
-    const r = (i>>16)&255, g=(i>>8)&255, b=i&255;
-    return `rgba(${r},${g},${b},${alpha})`;
-  } catch(e){
-    return `rgba(255,255,255,${alpha})`;
-  }
-}
-function shadeColor(hex, percent){
-  // small shading helper: percent negative for darker
-  try {
-    const c = hex.replace('#','');
-    const i = parseInt(c,16);
-    let r = (i>>16)&255, g=(i>>8)&255, b=i&255;
-    r = Math.round(r*(100+percent)/100);
-    g = Math.round(g*(100+percent)/100);
-    b = Math.round(b*(100+percent)/100);
-    r = clamp(r,0,255); g = clamp(g,0,255); b = clamp(b,0,255);
-    return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
-  } catch(e){
-    return hex;
-  }
-}
+        // bounce on ground
+        if (b.y + b.r > H) {
+          b.y = H - b.r;
+          b.vy *= -0.8;
+          b.vx *= 0.8;
+          // burst effect when velocity is small
+          if (Math.abs(b.vy) < 2) {
+            explode(b.x, b.y, b.r, '#0ff');
+            balls.splice(i, 1);
+            i--;
+            continue;
+          }
+        }
 
-/* ---------- Collision detection for targets (none in this simplified file),
-   but we can add target collision later if you want.
-   For now realistic burst occurs on hard ground impact only. ---------- */
-
-/* ---------- Main loop ---------- */
-let last = now();
-function frame(){
-  const tNow = now();
-  let rawDt = tNow - last;
-  last = tNow;
-  // clamp rawDt to avoid huge jumps after tab switch
-  rawDt = Math.min(48, rawDt);
-  const dt = rawDt / (1000/60); // normalized so dt ~1 per 60fps frame
-
-  // update physics
-  updatePhysics(dt);
-
-  // draw
-  clear();
-  drawBackground();
-  drawFireflies();
-  drawParticles();
-  drawFragments();
-  drawBalls();
-  drawGround();
-  drawCannon();
-
-  // update trails aging (do outside physics to avoid extra loops)
-  for(const b of balls){
-    for(let i=b.trail.length-1;i>=0;i--){
-      b.trail[i].t -= dt * 8;
-      if(b.trail[i].t <= 0) b.trail.splice(i,1);
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = '#0ff';
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#0ff';
+        ctx.fill();
+      }
     }
-  }
 
-  // limit arrays (defensive)
-  if(fragments.length > MAX_FRAGMENTS) fragments.splice(0, fragments.length - MAX_FRAGMENTS);
-  if(particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
+    let particles = [];
+    function explode(x, y, r, color) {
+      for (let i = 0; i < 25; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          r: r / 3,
+          alpha: 1,
+          color: color
+        });
+      }
+    }
 
-  requestAnimationFrame(frame);
-}
+    function drawParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += gravity * 0.2;
+        p.alpha -= 0.02;
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          i--;
+          continue;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,255,255,${p.alpha})`;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+      }
+    }
 
-/* ---------- Input handling ---------- */
-function toCanvasCoords(clientX, clientY){
-  const r = canvas.getBoundingClientRect();
-  const x = (clientX - r.left) * (canvas.width / r.width) / DPR;
-  const y = (clientY - r.top) * (canvas.height / r.height) / DPR;
-  return { x: clamp(x, 0, W), y: clamp(y, 0, H) };
-}
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      drawCannon();
+      drawBalls();
+      drawParticles();
+      requestAnimationFrame(animate);
+    }
 
-window.addEventListener('mousemove', (e) => {
-  const p = toCanvasCoords(e.clientX, e.clientY);
-  mouse.x = p.x; mouse.y = p.y;
-  lastMouseMove = Date.now();
-  // DOM glow follows raw client coords for smooth blur
-  cursorGlow.style.transform = `translate(${e.clientX - 60}px, ${e.clientY - 60}px)`;
-});
+    animate();
 
-window.addEventListener('mousedown', (e) => {
-  // if clicking UI, do not treat as shooting (avoid firing while interacting)
-  const t = e.target;
-  if(t.closest && (t.closest('.calculator') || t.closest('.btn') || t.closest('.key'))) return;
-  mouse.down = true;
-  mouse.holdStart = Date.now();
-});
+    // --- Calculator logic ---
+    const calc = document.getElementById('calculator');
+    document.getElementById('calcButton').onclick = () => {
+      calc.style.display = calc.style.display === 'none' ? 'block' : 'none';
+    };
 
-window.addEventListener('mouseup', (e) => {
-  const t = e.target;
-  if(t.closest && (t.closest('.calculator') || t.closest('.btn') || t.closest('.key'))) {
-    mouse.down = false;
-    mouse.holdStart = 0;
-    return;
-  }
-  // compute charge
-  if(mouse.down){
-    // nothing: should only fire on release
-  }
-  const hold = clamp(Date.now() - (mouse.holdStart || Date.now()), 0, 1200);
-  const power = 10 + (hold / 1200) * 26; // hold increases power
-  spawnBall(power);
-  mouse.down = false;
-  mouse.holdStart = 0;
-});
-
-window.addEventListener('click', (e) => {
-  // single-click also spawns but only if not interacting with UI; some browsers fire mouseup+click
-  const t = e.target;
-  if(t.closest && (t.closest('.calculator') || t.closest('.btn') || t.closest('.key'))) return;
-  // for safety, this click handler will spawn only if no holdStart is set (prevents double spawn)
-  const nowMs = Date.now();
-  if(!mouse.holdStart || (nowMs - mouse.holdStart) < 40) spawnBall(12);
-});
-
-window.addEventListener('keydown', (e) => {
-  if(e.key === 'c' || e.key === 'C'){ toggleCalc(); }
-  if(e.code === 'Space'){ e.preventDefault(); spawnBall(13); }
-});
-
-/* ---------- Calculator logic ---------- */
-let calcValue = '';
-function updateCalcScreen(){ calcScreen.textContent = calcValue === '' ? '0' : calcValue; }
-function pressCalcKey(key){
-  if(key === 'C'){ calcValue = ''; updateCalcScreen(); return; }
-  if(key === 'H'){ calcValue = ''; updateCalcScreen(); return; }
-  if(key === '='){
-    try{
-      const expr = calcValue.replace(/×/g,'*').replace(/÷/g,'/');
-      calcValue = String(Function('"use strict"; return (' + expr + ')')());
-    }catch(e){ calcValue = 'Error'; }
-    updateCalcScreen();
-    return;
-  }
-  calcValue += key;
-  updateCalcScreen();
-}
-calcKeys.addEventListener('click', (ev) => {
-  const key = ev.target.closest('.key');
-  if(!key) return;
-  const k = key.getAttribute('data-key');
-  if(!k) return;
-  if(k === '=') pressCalcKey('=');
-  else pressCalcKey(k);
-});
-toggleCalcBtn.addEventListener('click', toggleCalc);
-hideCalc.addEventListener('click', ()=>{ calcEl.style.display = 'none' });
-function toggleCalc(){ calcEl.style.display = (calcEl.style.display === 'none') ? 'block' : 'none'; }
-
-/* ---------- UI buttons ---------- */
-clearBtn.addEventListener('click', ()=>{ balls.length = 0; fragments.length = 0; particles.length = 0; });
-resetBtn.addEventListener('click', ()=>{
-  balls.length = 0; fragments.length = 0; particles.length = 0; score = 0; scoreEl.textContent = score; initFireflies(20);
-});
-
-/* ---------- Helpers ---------- */
-function randColor() { return ['#ffffff','#fff6e6','#bff7ff','#ffd6f5','#b9ffde'][Math.floor(rand(0,5))]; }
-
-/* ---------- Utility: spawn a fragment directly - used in burstBall above ---------- */
-
-/* ---------- startup ---------- */
-function start(){
-  resize();
-  initFireflies(22);
-  // seed some gentle particles
-  for(let i=0;i<18;i++) particles.push(createParticle(rand(40,W-40), rand(40,H*0.55), rand(-0.4,0.4), rand(-0.4,0.4), 260+rand(0,240), rand(0.8,1.6), '#dff6ff'));
-  last = now();
-  requestAnimationFrame(frame);
-}
-start();
-
-/* Expose a tiny debug helper */
-window.__arash_debug = {
-  spawnBall, balls, fragments, particles, setScore: (v)=>{ score = v; scoreEl.textContent = score; }
-};
-</script>
+    const display = document.getElementById('display');
+    function appendValue(v) { display.value += v; }
+    function clearDisplay() { display.value = ''; }
+    function calculate() {
+      try { display.value = eval(display.value); }
+      catch { display.value = 'Error'; }
+    }
+  </script>
 </body>
 </html>
