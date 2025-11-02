@@ -3,284 +3,283 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Arash — Visual & Interaction Playground</title>
+<title>Arash — Fullpage Visual Playground</title>
 <style>
-  /* -------------------------
-     Basic reset and layout
-     ------------------------- */
-  :root{
-    --glass-bg: rgba(255,255,255,0.08);
-    --glass-border: rgba(255,255,255,0.12);
-    --accent: #6dd3ff;
-    --accent-2: #6b9bff;
-    --dark: #0b1220;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:#081226;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
-  body{overflow:hidden; color:#eef2ff}
+/* ====================================================
+   Arash Fullpage Visual Playground (single-file)
+   - Fullscreen interactive canvas
+   - Mouse-aim cannon, charged shots, targets, particle FX
+   - Floating glass calculator (draggable)
+   - Dark/glow aesthetic tuned to your site
+   ==================================================== */
 
-  /* container for canvas & UI */
-  #root {
-    position:relative;
-    width:100%;
-    height:100vh;
-    display:block;
-    overflow:hidden;
-    background: linear-gradient(180deg, #98d7ff 0%, #7ec7ff 35%, #4b7bec 100%);
-    transition: background 1.2s ease;
-  }
+/* Root colors & small reset */
+:root{
+  --bg-top: #98d7ff;
+  --bg-mid: #7ec7ff;
+  --bg-bot: #4b7bec;
+  --accent1: #6dd3ff;
+  --accent2: #6b9bff;
+  --glow: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.08);
+  --text: #eef6ff;
+}
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; overflow:hidden; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+body{background:linear-gradient(180deg,var(--bg-top),var(--bg-mid),var(--bg-bot)); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
 
-  /* top-left controls */
-  .topbar {
-    position:absolute;
-    left:18px;
-    top:18px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-    z-index:30;
-    pointer-events:auto;
-  }
-  .btn {
-    background:linear-gradient(180deg,var(--accent),var(--accent-2));
-    color:#061126;
-    border:none;
-    padding:10px 14px;
-    border-radius:10px;
-    box-shadow:0 6px 18px rgba(30,45,80,0.25);
-    cursor:pointer;
-    font-weight:600;
-    font-size:14px;
-    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-  }
-  .btn:active{transform:translateY(1px) scale(.995)}
-  .btn.secondary{
-    background:transparent;
-    color:white;
-    border:1px solid rgba(255,255,255,0.14);
-    box-shadow:none;
-  }
+/* root container */
+#root {
+  position: relative;
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+}
 
-  /* center greeting */
-  .greeting {
-    position: absolute;
-    left:50%;
-    transform:translateX(-50%);
-    top:8%;
-    z-index:25;
-    text-align:center;
-    pointer-events:none;
-    user-select:none;
-  }
-  .greeting h1{
-    margin:0;
-    font-size:36px;
-    letter-spacing:1px;
-    color:white;
-    text-shadow:0 4px 30px rgba(0,0,0,0.3);
-  }
-  .greeting p{margin:6px 0 0 0;color:rgba(255,255,255,0.9);font-size:15px}
+/* Top-left controls */
+.topbar {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  z-index:190;
+}
+.btn {
+  background: linear-gradient(180deg,var(--accent1),var(--accent2));
+  color:#04102a;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:13px;
+  box-shadow: 0 8px 28px rgba(10,20,40,0.25);
+}
+.btn.secondary{
+  background:transparent;
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:none;
+}
 
-  /* right-side calculator (glass) */
-  .calculator {
-    position: absolute;
-    right: 36px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 300px;
-    padding: 16px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 10px 40px rgba(3,12,30,0.45);
-    z-index:85;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    pointer-events:auto;
-    backdrop-filter: blur(8px) saturate(120%);
-  }
-  .calc-header{display:flex;justify-content:space-between;align-items:center}
-  .calc-title{color:white;font-weight:700;font-size:16px}
-  .calc-toggle{background:transparent;border:1px solid rgba(255,255,255,0.06);color:white;padding:6px 8px;border-radius:8px;cursor:pointer}
-  .calc-screen {
-    width:100%;
-    height:54px;
-    border-radius:10px;
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.03);
-    color:white;
-    font-size:22px;
-    padding:8px 12px;
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    box-shadow:inset 0 -6px 18px rgba(0,0,0,0.35);
-  }
-  .calc-keys {display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
-  .k {
-    padding:10px;
-    font-size:16px;
-    border-radius:8px;
-    border:none;
-    cursor:pointer;
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    color:#f4f7ff;
-    box-shadow: 0 6px 18px rgba(10,20,40,0.25);
-  }
-  .k.action{background:linear-gradient(180deg,#ff6b6b,#ff5a5a)}
-  .k.equal{background:linear-gradient(180deg,#57d4a8,#3bc48d); font-weight:700}
-  .k:active{transform:translateY(1px) scale(.997)}
+/* HUD */
+.hud {
+  position:absolute;
+  right:18px;
+  top:18px;
+  z-index:190;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.hud .score {
+  background: rgba(0,0,0,0.22);
+  padding:8px 12px;
+  border-radius:10px;
+  color:var(--text);
+  font-weight:700;
+  box-shadow:0 6px 18px rgba(0,0,0,0.3);
+}
 
-  /* small note / instruction panel */
-  .note {
-    position:absolute;
-    left:20%;
-    bottom:24px;
-    transform:translateX(-50%);
-    color:rgba(255,255,255,0.9);
-    z-index:20;
-    pointer-events:none;
-    font-size:13px;
-    text-shadow:0 2px 6px rgba(0,0,0,0.25);
-  }
+/* greeting center top */
+.greeting {
+  position:absolute;
+  left:50%;
+  top:6%;
+  transform:translateX(-50%);
+  text-align:center;
+  pointer-events:none;
+  z-index:160;
+}
+.greeting h1{
+  margin:0;
+  font-size:28px;
+  color:var(--text);
+  text-shadow:0 8px 30px rgba(0,0,0,0.3);
+}
+.greeting p{margin:6px 0 0 0; color: rgba(255,255,255,0.9); font-size:13px}
 
-  /* glowing cursor shadow: DOM element added and positioned */
-  #cursorGlow {
-    position: fixed;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    pointer-events: none;
-    background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.25) 12%, rgba(255,255,255,0.06) 30%, transparent 60%);
-    filter: blur(30px);
-    opacity: 0.85;
-    transform: translate(-9999px,-9999px);
-    z-index:22;
-    transition: transform .06s linear;
-  }
+/* cursor glow: DOM element */
+#cursorGlow {
+  position: fixed;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 40% 30%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.25) 12%, rgba(255,255,255,0.06) 30%, transparent 60%);
+  filter: blur(30px);
+  opacity: 0.85;
+  transform: translate(-9999px,-9999px);
+  z-index:170;
+  transition: transform .05s linear;
+}
 
-  /* footer small help */
-  .footer {
-    position:absolute;
-    right:18px;
-    bottom:18px;
-    color:rgba(255,255,255,0.9);
-    font-size:13px;
-    z-index:20;
-  }
+/* night overlay to dim the scene at idle */
+.night-overlay {
+  position:absolute;
+  left:0; top:0; right:0; bottom:0;
+  background: linear-gradient(180deg, rgba(0,0,40,0) 0%, rgba(2,6,12,0.35) 100%);
+  pointer-events:none;
+  z-index:120;
+  transition:opacity 1s ease;
+  opacity:0;
+}
 
-  /* responsive adjustments */
-  @media (max-width:800px){
-    .calculator{right:12px; width:260px}
-    .greeting h1{font-size:26px}
-    .note{display:none}
-  }
+/* calculator (glass panel) - draggable */
+.calculator {
+  position:absolute;
+  right:22px;
+  top:120px;
+  width:320px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius:12px;
+  border: 1px solid var(--glass-border);
+  padding:12px;
+  box-shadow: 0 18px 40px rgba(3,10,20,0.45);
+  z-index:195;
+  backdrop-filter: blur(10px) saturate(120%);
+  cursor: grab;
+}
+.calculator.dragging { cursor:grabbing; }
+.calc-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.calc-title { font-weight:800; color:var(--text) }
+.calc-close { background:transparent; border:1px solid rgba(255,255,255,0.06); padding:6px 8px; color:var(--text); border-radius:8px; cursor:pointer }
+.calc-screen { margin-top:8px; height:56px; border-radius:10px; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:flex-end; padding:8px 12px; font-size:22px; color:var(--text); box-shadow: inset 0 -6px 18px rgba(0,0,0,0.3) }
+.calc-keys { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px; }
+.key { padding:12px; border-radius:8px; border:none; cursor:pointer; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:var(--text); font-weight:700; box-shadow: 0 8px 18px rgba(0,0,0,0.25); }
+.key.op { background:linear-gradient(180deg,#57d4a8,#3bc48d); color:#041026 }
+.key.clear { background:linear-gradient(180deg,#ff6b6b,#ff5a5a); color:white; grid-column: span 2; }
 
-  /* night overlay for night-mode */
-  .night-overlay {
-    position:absolute;
-    left:0; top:0; right:0; bottom:0;
-    background: linear-gradient(180deg, rgba(12,18,40,0.0) 0%, rgba(7,12,25,0.0) 50%, rgba(2,6,12,0.35) 100%);
-    pointer-events:none;
-    z-index:14;
-    transition:opacity 1s ease;
-    opacity:0;
-    mix-blend-mode: multiply;
-  }
+/* small help note bottom-left */
+.note {
+  position:absolute;
+  left:18px;
+  bottom:18px;
+  color:rgba(255,255,255,0.9);
+  z-index:180;
+  font-size:13px;
+  text-shadow:0 2px 6px rgba(0,0,0,0.25);
+}
 
-  /* canvas container to keep stacking order */
-  canvas{ display:block; position:absolute; left:50%; transform:translateX(-50%); bottom:40px; z-index:10; border-radius:10px }
-  /* small subtle ground shadow line */
-  #groundLine { position:absolute; left:0; right:0; bottom:26px; height:2px; background:linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.22), rgba(0,0,0,0)); z-index:11; pointer-events:none }
+/* canvas style & placement */
+canvas {
+  display:block;
+  position:absolute;
+  left:50%;
+  bottom:40px;
+  transform:translateX(-50%);
+  z-index:100;
+  border-radius:12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+/* responsive tweaks */
+@media (max-width:860px){
+  .calculator{ right:12px; width:260px; top:100px }
+  .hud{ display:none }
+  .greeting h1{ font-size:20px }
+}
+
+/* small accessibility focus ring for buttons */
+.btn:focus, .key:focus, .calc-close:focus { outline:2px solid rgba(255,255,255,0.06); outline-offset:2px; }
 </style>
 </head>
 <body>
   <div id="root">
-    <!-- Top controls -->
+
+    <!-- Top bar controls -->
     <div class="topbar">
-      <button class="btn" id="toggleCalcBtn">Toggle Calculator</button>
-      <button class="btn secondary" id="resetScene">Reset Scene</button>
-      <button class="btn secondary" id="clearBalls">Clear Balls</button>
+      <button class="btn" id="toggleCalcBtn">Toggle Calculator (C)</button>
+      <button class="btn secondary" id="toggleTargetsBtn">Toggle Targets</button>
+      <button class="btn secondary" id="clearBallsBtn">Clear Balls</button>
+      <button class="btn secondary" id="resetBtn">Reset Scene</button>
+    </div>
+
+    <!-- HUD: score -->
+    <div class="hud">
+      <div class="score">Score: <span id="scoreValue">0</span></div>
     </div>
 
     <!-- Center greeting -->
     <div class="greeting">
       <h1>Hello, I'm Arash 👋</h1>
-      <p>Move your mouse to aim the cannon — click anywhere to shoot glowing balls. Enjoy the visuals!</p>
+      <p>Move your mouse to aim the cannon — hold to charge, release to fire. Press Space to shoot. Enjoy the visuals.</p>
     </div>
 
-    <!-- Calculator -->
-    <div class="calculator" id="calculator" aria-hidden="false">
-      <div class="calc-header">
-        <div class="calc-title">Calculator</div>
-        <button class="calc-toggle" id="hideCalc">Hide</button>
-      </div>
-      <div class="calc-screen" id="calcScreen">0</div>
-      <div class="calc-keys" id="calcKeys">
-        <button class="k" onclick="pressKey('7')">7</button>
-        <button class="k" onclick="pressKey('8')">8</button>
-        <button class="k" onclick="pressKey('9')">9</button>
-        <button class="k" onclick="pressKey('/')">÷</button>
-
-        <button class="k" onclick="pressKey('4')">4</button>
-        <button class="k" onclick="pressKey('5')">5</button>
-        <button class="k" onclick="pressKey('6')">6</button>
-        <button class="k" onclick="pressKey('*')">×</button>
-
-        <button class="k" onclick="pressKey('1')">1</button>
-        <button class="k" onclick="pressKey('2')">2</button>
-        <button class="k" onclick="pressKey('3')">3</button>
-        <button class="k" onclick="pressKey('-')">−</button>
-
-        <button class="k" onclick="pressKey('0')">0</button>
-        <button class="k" onclick="pressKey('.')">.</button>
-        <button class="k equal" onclick="pressKey('=')">=</button>
-        <button class="k" onclick="pressKey('+')">+</button>
-
-        <button class="k action" style="grid-column:span 3" onclick="pressKey('C')">Clear</button>
-        <button class="k" onclick="pressKey('H')">Home</button>
-      </div>
-    </div>
-
-    <!-- cursor glow element -->
-    <div id="cursorGlow"></div>
+    <!-- cursor glow -->
+    <div id="cursorGlow" aria-hidden="true"></div>
 
     <!-- night overlay -->
     <div class="night-overlay" id="nightOverlay"></div>
 
-    <!-- ground line -->
-    <div id="groundLine"></div>
+    <!-- note -->
+    <div class="note">Tip: Click empty space to shoot. Don't click UI — it won't fire.</div>
 
-    <!-- help note -->
-    <div class="note">Tip: Move your mouse to aim. Click to shoot. Use the Toggle Calculator button to show/hide the calculator.</div>
+    <!-- floating calculator (draggable) -->
+    <div class="calculator" id="calculator" role="dialog" aria-label="Calculator">
+      <div class="calc-head">
+        <div class="calc-title">Calculator</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="calc-close" id="hideCalcBtn">Hide</button>
+        </div>
+      </div>
+      <div class="calc-screen" id="calcScreen">0</div>
+      <div class="calc-keys" id="calcKeys">
+        <button class="key" data-key="7">7</button>
+        <button class="key" data-key="8">8</button>
+        <button class="key" data-key="9">9</button>
+        <button class="key" data-key="/">÷</button>
 
-    <!-- footer small -->
-    <div class="footer">Built for Arash — Visual & Interaction Playground</div>
+        <button class="key" data-key="4">4</button>
+        <button class="key" data-key="5">5</button>
+        <button class="key" data-key="6">6</button>
+        <button class="key" data-key="*">×</button>
 
-    <!-- main canvas: physics + visuals -->
-    <canvas id="mainCanvas" width="1100" height="520" aria-label="Visual playground canvas"></canvas>
+        <button class="key" data-key="1">1</button>
+        <button class="key" data-key="2">2</button>
+        <button class="key" data-key="3">3</button>
+        <button class="key" data-key="-">−</button>
+
+        <button class="key" data-key="0">0</button>
+        <button class="key" data-key=".">.</button>
+        <button class="key op" data-key="=">=</button>
+        <button class="key" data-key="+">+</button>
+
+        <button class="key clear" data-key="C">Clear</button>
+        <button class="key" data-key="H">Home</button>
+      </div>
+    </div>
+
+    <!-- main canvas -->
+    <canvas id="mainCanvas" width="1100" height="520" aria-label="Interactive playground"></canvas>
+
   </div>
 
 <script>
-/* --------------------------------------------
-   Visual & Interaction Playground Script
-   - responsive canvas
-   - parallax background layers
-   - fireflies particles
-   - cannon aiming with mouse
-   - click to shoot balls with trails & explosion particles
-   - cursor glow follows mouse smoothly
-   - night mode on idle
-   - calculator logic & toggle
-   -------------------------------------------- */
+/* ============================
+   Interactive Playground Script
+   Author: ChatGPT (for Arash)
+   Features:
+     - responsive hi-dpi canvas
+     - parallax background layers
+     - fireflies / particles
+     - cannon aiming at mouse; hold to charge; release to shoot
+     - targets that move and pop for score
+     - explosion & spark particles
+     - floating glass calculator (draggable) with basic functionality
+     - night-mode fade on idle
+   ============================ */
 
 (() => {
-  // quick utility
-  function rand(min, max){ return Math.random()*(max-min)+min }
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)) }
+  // ---------- Helpers ----------
+  const rand = (a,b) => Math.random()*(b-a)+a;
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+  const now = () => performance.now();
 
-  // DOM references
+  // ---------- DOM refs ----------
   const canvas = document.getElementById('mainCanvas');
   const ctx = canvas.getContext('2d');
   const root = document.getElementById('root');
@@ -288,186 +287,167 @@
   const nightOverlay = document.getElementById('nightOverlay');
   const calcEl = document.getElementById('calculator');
   const toggleCalcBtn = document.getElementById('toggleCalcBtn');
-  const hideCalc = document.getElementById('hideCalc');
-  const resetScene = document.getElementById('resetScene');
-  const clearBallsBtn = document.getElementById('clearBalls');
-  const calcScreen = document.getElementById('calcScreen');
+  const hideCalcBtn = document.getElementById('hideCalcBtn');
+  const toggleTargetsBtn = document.getElementById('toggleTargetsBtn');
+  const clearBallsBtn = document.getElementById('clearBallsBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const scoreSpan = document.getElementById('scoreValue');
 
-  // device pixel ratio for crisp canvas
+  // DPR for crisp canvas
   const DPR = Math.max(1, window.devicePixelRatio || 1);
 
-  // state
+  // ---------- State ----------
   let W = 1100, H = 520;
-  let lastTime = performance.now();
-  let mouse = { x: W/2, y: H/2, vx:0, vy:0, down:false };
+  let mouse = { x: W/2, y: H/2, down:false, holdingSince:0 };
   let lastMoveTS = Date.now();
-  let idleTS = Date.now();
-  let balls = [];       // bullets shot from cannon
-  let particles = [];   // explosion particles
-  let fireflies = [];   // floating particles in the sky
-  let trails = [];      // trailing dots for ball trails (optional small array)
-  let parallaxOffset = { x:0, y:0 };
+  let idleStart = Date.now();
+  let balls = [];
+  let particles = [];
+  let fireflies = [];
+  let targets = [];
+  let showTargets = true;
+  let score = 0;
+  let lastFrame = now();
 
   // cannon
-  const cannon = {
-    x: W/2,
-    y: H - 60,
-    angle: -Math.PI/4,
-    length: 46,
-    radius: 18
+  let cannon = { x: W/2, y: H - 60, angle: -Math.PI/4, length: 56, radius: 20 };
+
+  // physics tuning
+  const physics = {
+    gravity: 0.5,
+    frictionGround: 0.82,
+    bounce: 0.62
   };
 
-  // colors for balls
-  const ballColors = ['#ffffff','#fff6e6','#bff7ff','#ffd6f5','#b9ffde'];
-
-  // responsive canvas sizing
-  function resizeCanvas(){
-    // choose width relative to viewport
-    const maxW = Math.min(window.innerWidth - 80, 1200);
+  // ---------- Canvas resize ----------
+  function resize() {
+    const maxW = Math.min(window.innerWidth - 80, 1400);
     const computedW = Math.max(700, maxW);
-    const computedH = Math.min(520, Math.max(420, window.innerHeight - 180));
-
+    const computedH = Math.min(720, Math.max(420, window.innerHeight - 180));
     W = Math.floor(computedW);
     H = Math.floor(computedH);
     canvas.width = Math.floor(W * DPR);
     canvas.height = Math.floor(H * DPR);
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     // reposition cannon
     cannon.x = W/2;
     cannon.y = H - 60;
   }
 
-  // init fireflies
+  // ---------- Entities ----------
+  function createBall(x,y,vx,vy,r,color){
+    return { x,y,vx,vy,r,color,trail:[],age:0,settle:0 };
+  }
+
+  function createParticle(x,y,vx,vy,life,r,color,fade=true){
+    return { x,y,vx,vy,life,age:0,r,color,fade };
+  }
+
+  function createTarget(x,y,rx=28,ry=28, vx=0.5, vy=0, color='#ffd6f5'){
+    return { x,y,rx,ry,vx,vy,alive:true,color,health:1 + Math.floor(rand(0,2)) };
+  }
+
+  // ---------- Init scene ----------
   function initFireflies(n=28){
     fireflies = [];
     for(let i=0;i<n;i++){
       fireflies.push({
-        x: rand(40, W-40),
-        y: rand(40, H/2),
-        r: rand(1.6, 3.6),
-        speed: rand(0.02, 0.12),
-        phase: rand(0, Math.PI*2),
-        hue: rand(180,320),
+        x: rand(40,W-40),
+        y: rand(40,H/2),
+        r: rand(1.5,3.5),
+        speed: rand(0.02,0.12),
+        phase: rand(0,Math.PI*2),
+        hue: rand(160,330),
         drift: rand(-0.12,0.12)
       });
     }
   }
 
-  // ball class
-  function createBall(x,y,vx,vy,r=10,color='#fff'){
-    return { x,y,vx,vy,r, color, trail:[], life:0 };
-  }
-
-  // particle for explosion
-  function createParticle(x,y,angle,speed,color){
-    return {
-      x, y,
-      vx: Math.cos(angle)*speed + rand(-0.6,0.6),
-      vy: Math.sin(angle)*speed + rand(-0.6,0.6),
-      life: 60 + Math.floor(rand(0,40)),
-      age:0,
-      r: rand(1,3),
-      color
-    };
-  }
-
-  // spawn explosion at coords
-  function spawnExplosion(x,y, count=28, color='#fff6a8'){
-    for(let i=0;i<count;i++){
-      const ang = rand(0, Math.PI*2);
-      const sp = rand(1.4, 6.2);
-      particles.push(createParticle(x, y, ang, sp, color));
+  function initTargets(n=6){
+    targets = [];
+    for(let i=0;i<n;i++){
+      const x = rand(120, W-120);
+      const y = rand(80, H/2);
+      const t = createTarget(x,y, rand(18,36), rand(18,36), rand(-0.5,0.5), 0, `hsl(${rand(0,360)},85%,65%)`);
+      targets.push(t);
     }
   }
 
-  // trails: we simply store small previous positions in ball.trail
-
-  // update physics
-  function updatePhysics(dt){
-    // gravity constant
-    const gravity = 0.45;
+  // ---------- Update physics ----------
+  function update(dt){
+    // dt normalized (frame independent)
     // update balls
     for(let i=balls.length-1;i>=0;i--){
       const b = balls[i];
-      // gravity
-      b.vy += gravity * dt;
-      // air drag
-      b.vx *= (1 - 0.002*dt);
+      b.vy += physics.gravity * dt;
+      b.vx *= (1 - 0.001*dt);
       b.vy *= (1 - 0.0009*dt);
-
       b.x += b.vx * dt;
       b.y += b.vy * dt;
+      b.age += dt;
 
-      b.life += dt;
+      // append trail
+      if(b.age % 2 < 0.9) b.trail.push({ x:b.x, y:b.y, t: 60 });
+      if(b.trail.length > 24) b.trail.shift();
 
-      // add trail point occasionally
-      if(b.life % 2 < 0.5){
-        b.trail.push({ x:b.x, y:b.y, t: 50 });
-        if(b.trail.length > 20) b.trail.shift();
-      }
-
-      // bounce on ground
-      if(b.y + b.r > H - 18){
-        b.y = H - 18 - b.r;
-        // reflect
-        b.vy *= -0.62;
-        b.vx *= 0.82;
-        // spawn small explosion / sparks
-        spawnExplosion(b.x, H - 18, 8, '#ffffff');
-        // if speed small, stop (remove after small time)
+      // ground collision
+      if(b.y + b.r > H - 20){
+        b.y = H - 20 - b.r;
+        b.vy *= -physics.bounce;
+        b.vx *= physics.frictionGround;
+        // small explosion sparks & smoke
+        spawnExplosion(b.x, H - 20, Math.floor(rand(6,12)));
+        // if speed small, start settling
         if(Math.abs(b.vy) < 0.8 && Math.abs(b.vx) < 0.6){
-          // leave it on ground and fade
           b.vx *= 0.2;
           b.vy = 0;
-          // slight rolling friction
-          if(Math.abs(b.vx) < 0.08){
-            // eventually remove after some time
-            b.settle = (b.settle || 0) + dt;
-            if(b.settle > 500){
-              // small puff then remove
-              spawnExplosion(b.x, b.y, 8, '#dff6ff');
-              balls.splice(i,1);
-              continue;
-            }
+          b.settle += dt;
+          if(b.settle > 600){
+            // fade / pop & remove
+            spawnExplosion(b.x, b.y, 8);
+            balls.splice(i,1);
+            continue;
           }
         }
       }
 
-      // remove if off right/left and not visible
-      if(b.x < -80 || b.x > W + 80 || b.y > H + 200){
-        balls.splice(i,1);
-      }
+      // remove off-screen
+      if(b.x < -200 || b.x > W + 200 || b.y > H + 200) balls.splice(i,1);
     }
 
     // update particles
     for(let i=particles.length-1;i>=0;i--){
       const p = particles[i];
-      p.vy += 0.12 * dt; // mild gravity
+      p.vy += 0.12 * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.age += dt;
-      p.r *= 0.995;
       if(p.age > p.life) particles.splice(i,1);
     }
 
     // update fireflies
-    for(let i=0;i<fireflies.length;i++){
-      const f = fireflies[i];
+    for(let f of fireflies){
       f.phase += f.speed * dt * 0.06;
       f.x += f.drift * dt;
-      // keep in bounds
+      f.y += Math.sin(f.phase) * f.speed * 0.6 * dt;
       if(f.x < 20) f.x = W - 40;
       if(f.x > W - 20) f.x = 40;
-      // gentle y bobbing
-      f.y += Math.sin(f.phase) * f.speed * 0.8 * dt;
     }
 
-    // trails fade
-    for(let i=balls.length-1;i>=0;i--){
-      const b = balls[i];
+    // update targets (move horizontally)
+    for(let t of targets){
+      if(!t.alive) continue;
+      t.x += t.vx * dt;
+      // bounce edges
+      if(t.x < 40 || t.x > W - 40) t.vx *= -1;
+      // small bobbing
+      t.y += Math.sin((t.x + Date.now()*0.001) * 0.006) * 0.2;
+    }
+
+    // fade trails
+    for(let b of balls){
       for(let j=b.trail.length-1;j>=0;j--){
         b.trail[j].t -= dt;
         if(b.trail[j].t <= 0) b.trail.splice(j,1);
@@ -475,54 +455,85 @@
     }
   }
 
-  // draw background with parallax, gradient and some layered clouds-like shapes
-  function drawBackground(t){
-    // sky gradient
-    const topColor = lerpColor('#bfe9ff', '#6fb7f9', t.bgMix);
-    const midColor = lerpColor('#83d6ff', '#6fb7f9', t.bgMix*0.7);
-    const botColor = lerpColor('#6aa9ff', '#3f66b2', t.bgMix*0.55);
+  // ---------- Spawning ----------
 
-    // create gradient fill
+  function spawnBall(power=12){
+    const ang = cannon.angle;
+    const sx = cannon.x + Math.cos(ang) * (cannon.length + 8);
+    const sy = cannon.y + Math.sin(ang) * (cannon.length + 8);
+    const speed = power * (0.9 + Math.random()*0.3);
+    const vx = Math.cos(ang) * speed + rand(-0.6,0.6);
+    const vy = Math.sin(ang) * speed + rand(-0.6,0.6);
+    const col = ['#ffffff','#fff7e6','#bff7ff','#ffd6f5','#b9ffde'][Math.floor(rand(0,5))];
+    balls.push(createBall(sx, sy, vx, vy, rand(8,12), col));
+    // muzzle particles
+    for(let i=0;i<8;i++){
+      const a = ang + rand(-0.5,0.5);
+      const s = rand(1.4,5.6);
+      particles.push(createParticle(sx, sy, Math.cos(a)*s, Math.sin(a)*s, 36 + Math.random()*30, rand(1,3), '#ffd6a8'));
+    }
+  }
+
+  function spawnExplosion(x,y,count=20){
+    for(let i=0;i<count;i++){
+      const ang = rand(0,Math.PI*2);
+      const speed = rand(1.6,6.2);
+      particles.push(createParticle(x, y, Math.cos(ang)*speed, Math.sin(ang)*speed, 30+Math.random()*30, rand(1,3), `hsl(${rand(20,60)},95%,65%)`));
+    }
+  }
+
+  function spawnTargetPop(x,y){
+    // score and big particles
+    score += 10;
+    scoreSpan.textContent = score;
+    spawnExplosion(x, y, 40);
+  }
+
+  // ---------- Drawing ----------
+
+  function clearCanvas(){
+    ctx.clearRect(0,0,W,H);
+  }
+
+  function drawBackground(tMix){
+    // tMix 0..1 for day->night
+    const top = lerpColor('#bfe9ff','#14203b', tMix);
+    const mid = lerpColor('#83d6ff','#0b1c3a', tMix*0.9);
+    const bot = lerpColor('#6aa9ff','#071027', tMix*0.8);
     const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, topColor);
-    g.addColorStop(0.45, midColor);
-    g.addColorStop(1, botColor);
+    g.addColorStop(0, top);
+    g.addColorStop(0.45, mid);
+    g.addColorStop(1, bot);
     ctx.fillStyle = g;
     ctx.fillRect(0,0,W,H);
 
-    // subtle parallax shapes (soft blobs)
+    // soft blobs for depth (parallax)
     for(let i=0;i<3;i++){
       ctx.save();
-      const size = (i+1)*420;
-      const x = (Math.sin(t.time * 0.0008 + i*1.2) * 40) + parallaxOffset.x * (i*0.02);
-      const y = 80 + i*40 + parallaxOffset.y * (i*0.03);
-      ctx.globalAlpha = 0.08 + i*0.02;
+      ctx.globalAlpha = 0.06 + i*0.02;
       ctx.fillStyle = 'rgba(255,255,255,0.06)';
-      drawSoftBlob(ctx, W*0.5 + x, y, size, size*0.6, 6 + i*2);
+      softBlob(W*0.5 + Math.sin(tMix*10 + i)*40 + (mouse.x-W/2)*0.01*(i+1), 60 + i*40, 420 + i*120, 120 + i*40, 6+i*2);
       ctx.restore();
     }
   }
 
-  // soft blob utility: draws layered radial shapes
-  function drawSoftBlob(ctx, ox, oy, w, h, steps){
+  function softBlob(ox, oy, w, h, steps){
     for(let s=0;s<steps;s++){
-      const alpha = (1 - s/steps) * 0.35;
+      const a = 1 - s/steps;
       ctx.beginPath();
-      ctx.ellipse(ox + Math.sin(s)*18, oy + Math.cos(s)*14, w*(0.8 - s/steps*0.5), h*(0.9 - s/steps*0.6), 0, 0, Math.PI*2);
-      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.ellipse(ox + Math.sin(s)*12, oy + Math.cos(s)*8, w*(0.85 - s/steps*0.5), h*(0.9 - s/steps*0.6), 0, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${0.06*a})`;
       ctx.fill();
     }
   }
 
-  // draw fireflies
   function drawFireflies(){
-    for(let i=0;i<fireflies.length;i++){
-      const f = fireflies[i];
+    for(let f of fireflies){
       // glow
       const grad = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 30);
       grad.addColorStop(0, `hsla(${f.hue},95%,70%,0.95)`);
       grad.addColorStop(0.3, `hsla(${f.hue},95%,60%,0.4)`);
-      grad.addColorStop(1, `rgba(0,0,0,0)`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.globalCompositeOperation = 'lighter';
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -532,207 +543,7 @@
     }
   }
 
-  // draw cannon & aim
-  function drawCannon(){
-    // barrel
-    ctx.save();
-    ctx.translate(cannon.x, cannon.y);
-    // rotate toward mouse
-    const targetAngle = Math.atan2(mouse.y - cannon.y, mouse.x - cannon.x);
-    // clamp angle so barrel points above ground only
-    const clamped = clampAngle(targetAngle, -Math.PI + 0.3, -0.2); // keep angle reasonable
-    // ease angle change
-    cannon.angle += (clamped - cannon.angle) * 0.22;
-
-    ctx.rotate(cannon.angle);
-    // barrel shadow
-    ctx.fillStyle = '#0d1622';
-    roundRect(ctx, -6, -12, cannon.length+26, 24, 12);
-    ctx.fill();
-    // barrel front
-    ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.06;
-    roundRect(ctx, cannon.length-6, -10, 30, 20, 10);
-    ctx.globalAlpha = 1;
-
-    // barrel gradient
-    const brgrad = ctx.createLinearGradient(0,-12, cannon.length+26,12);
-    brgrad.addColorStop(0, '#202b38');
-    brgrad.addColorStop(0.5, '#3a5060');
-    brgrad.addColorStop(1, '#11161d');
-    ctx.fillStyle = brgrad;
-    roundRect(ctx, -6, -10, cannon.length+26, 20, 10);
-    ctx.fill();
-
-    // muzzle flash hint when recently shot
-    ctx.restore();
-
-    // base
-    ctx.beginPath();
-    const baseRad = cannon.radius + 4;
-    ctx.fillStyle = '#0b1420';
-    ctx.arc(cannon.x, cannon.y, baseRad + 8, 0, Math.PI*2);
-    ctx.fill();
-    // lighter disc
-    ctx.beginPath();
-    ctx.fillStyle = '#091018';
-    ctx.arc(cannon.x, cannon.y, cannon.radius, 0, Math.PI*2);
-    ctx.fill();
-
-    // small highlight ring
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth = 2;
-    ctx.arc(cannon.x, cannon.y, cannon.radius+6, 0, Math.PI*2);
-    ctx.stroke();
-  }
-
-  // draw balls and trails
-  function drawBalls(){
-    for(let i=0;i<balls.length;i++){
-      const b = balls[i];
-      // draw trail
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      for(let j=0;j<b.trail.length;j++){
-        const t = b.trail[j];
-        const alpha = clamp(t.t/50,0,1) * 0.42;
-        const rr = Math.max(1.6, (t.t/50)*6);
-        const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, rr*4);
-        grad.addColorStop(0, hexToRgba(b.color, alpha));
-        grad.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath(); ctx.arc(t.x, t.y, rr, 0, Math.PI*2); ctx.fill();
-      }
-      ctx.restore();
-
-      // main ball
-      ctx.beginPath();
-      ctx.fillStyle = b.color;
-      ctx.shadowColor = b.color;
-      ctx.shadowBlur = 28;
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.globalCompositeOperation = 'source-over';
-    }
-  }
-
-  // draw particles
-  function drawParticles(){
-    for(let i=0;i<particles.length;i++){
-      const p = particles[i];
-      const pAlpha = 1 - (p.age / p.life);
-      ctx.globalAlpha = pAlpha;
-      ctx.beginPath();
-      ctx.fillStyle = p.color;
-      ctx.arc(p.x, p.y, Math.max(0.6, p.r * (1 - p.age/p.life)), 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      // small glow
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = hexToRgba(p.color, pAlpha*0.2);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalCompositeOperation = 'source-over';
-    }
-  }
-
-  // main render loop
-  let FRAME = 0;
-  const tState = { time:0, bgMix:0 };
-  function render(now){
-    const dt = Math.min(40, now - lastTime) / 16.666; // normalized to ~60fps scale
-    lastTime = now;
-    FRAME++;
-
-    // time state mixing for day/night background
-    tState.time = now;
-    // if idle (no movement) gradually increase bgMix for night
-    const idleDuration = Date.now() - lastMoveTS;
-    const nightTarget = clamp((idleDuration - 6000) / 8000, 0, 1); // after ~6s starts fading in, reaches full ~14s
-    tState.bgMix += (nightTarget - tState.bgMix) * 0.03;
-
-    // parallax offset based on mouse
-    parallaxOffset.x += ( (mouse.x - W/2) * 0.02 - parallaxOffset.x ) * 0.06;
-    parallaxOffset.y += ( (mouse.y - H/2) * 0.02 - parallaxOffset.y ) * 0.06;
-
-    // update physics
-    updatePhysics(dt);
-
-    // draw background
-    drawBackground(tState);
-
-    // draw some ground gradient and fog
-    drawGroundAndFog();
-
-    // draw fireflies (over background)
-    drawFireflies();
-
-    // draw cannon and balls and particles
-    drawBalls();
-    drawParticles();
-
-    drawCannon();
-
-    // overlay night (alpha based on bgMix)
-    nightOverlay.style.opacity = tState.bgMix * 0.85;
-
-    // update cursor glow - done in mouse move too for smoothness
-    // (we keep DOM element for smooth blur and CSS performance)
-
-    requestAnimationFrame(render);
-  }
-
-  // helper: linear interpolation of two colors given 0..1
-  function lerpColor(a,b,t){
-    const ca = hexToRgb(a); const cb = hexToRgb(b);
-    const r = Math.round(ca.r + (cb.r - ca.r) * t);
-    const g = Math.round(ca.g + (cb.g - ca.g) * t);
-    const bl = Math.round(ca.b + (cb.b - ca.b) * t);
-    return `rgb(${r},${g},${bl})`;
-  }
-
-  // hex to rgba helper
-  function hexToRgba(hex, alpha=1){
-    const c = hex.replace('#','');
-    const bigint = parseInt(c,16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
-  function hexToRgb(hex){
-    const c = hex.replace('#','');
-    const bigint = parseInt(c,16);
-    return { r: (bigint>>16)&255, g: (bigint>>8)&255, b: bigint&255 };
-  }
-
-  // clamp angle between min and max (handles wrap)
-  function clampAngle(a, min, max){
-    // normalize a to -PI..PI
-    while(a > Math.PI) a -= Math.PI*2;
-    while(a < -Math.PI) a += Math.PI*2;
-    if(min < -Math.PI) min += Math.PI*2;
-    if(max > Math.PI) max -= Math.PI*2;
-    return Math.max(min, Math.min(max, a));
-  }
-
-  // roundRect helper
-  function roundRect(ctx, x, y, w, h, r){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
-  }
-
-  // draw ground & fog / subtle ground gradient
   function drawGroundAndFog(){
-    // subtle ground rect
     const groundH = 36;
     const gy = H - groundH;
     const grd = ctx.createLinearGradient(0, gy, 0, H);
@@ -741,96 +552,358 @@
     ctx.fillStyle = grd;
     ctx.fillRect(0, gy, W, groundH);
 
-    // fog layer
     ctx.globalAlpha = 0.12;
-    for(let i=0;i<3;i++){
-      const w = W * (0.6 + i*0.2);
-      const x = Math.sin(i*2.3 + FRAME*0.01) * 30 + (i-1)*40;
-      const y = gy + 6 + i*6;
-      drawSoftBlob(ctx, W/2 + x, y, w, 60, 5);
-    }
+    softBlob(W/2, gy + 8, W*0.7, 60, 5);
     ctx.globalAlpha = 1;
   }
 
-  // shot logic: click to spawn ball
-  function spawnBallAtCannon(power=12){
-    // compute initial vx vy from cannon.angle
-    const speed = power * (0.9 + Math.random()*0.3);
-    const sx = cannon.x + Math.cos(cannon.angle) * (cannon.length + 8);
-    const sy = cannon.y + Math.sin(cannon.angle) * (cannon.length + 8);
-    // slight randomness
-    const vx = Math.cos(cannon.angle) * speed + rand(-0.6, 0.6);
-    const vy = Math.sin(cannon.angle) * speed + rand(-0.6, 0.6);
+  function drawCannon(){
+    // compute angle toward mouse
+    const target = Math.atan2(mouse.y - cannon.y, mouse.x - cannon.x);
+    // keep barrel above ground: clamp roughly between -pi+0.6 and -0.2
+    const minA = -Math.PI + 0.3;
+    const maxA = -0.18;
+    let clamped = target;
+    if(clamped < -Math.PI) clamped += Math.PI*2;
+    clamped = Math.max(minA, Math.min(maxA, clamped));
+    // smooth rotation
+    cannon.angle += (clamped - cannon.angle) * 0.18;
 
-    const color = ballColors[Math.floor(rand(0, ballColors.length))];
-    const b = createBall(sx, sy, vx, vy, rand(8,12), color);
-    balls.push(b);
+    // barrel
+    ctx.save();
+    ctx.translate(cannon.x, cannon.y);
+    ctx.rotate(cannon.angle);
 
-    // muzzle flash particle
-    for(let i=0;i<8;i++){
-      particles.push(createParticle(sx, sy, cannon.angle + rand(-0.6,0.6), rand(1.8,5.6), '#ffd6a8'));
+    // shadow under barrel
+    ctx.fillStyle = '#0c1624';
+    roundRect(ctx, -8, -14, cannon.length + 36, 30, 14);
+    ctx.fill();
+
+    // barrel glossy gradient
+    const g = ctx.createLinearGradient(0, -12, cannon.length + 36, 12);
+    g.addColorStop(0, '#1f2b39');
+    g.addColorStop(0.6, '#476b82');
+    g.addColorStop(1, '#0b1220');
+    ctx.fillStyle = g;
+    roundRect(ctx, -6, -12, cannon.length + 26, 24, 12);
+    ctx.fill();
+
+    // muzzle ring
+    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.06;
+    roundRect(ctx, cannon.length + 8, -10, 18, 20, 8);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+
+    // base discs
+    ctx.beginPath();
+    ctx.fillStyle = '#0b1420';
+    ctx.arc(cannon.x, cannon.y, cannon.radius + 10, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.fillStyle = '#091018';
+    ctx.arc(cannon.x, cannon.y, cannon.radius, 0, Math.PI*2);
+    ctx.fill();
+
+    // highlight ring
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.arc(cannon.x, cannon.y, cannon.radius+6, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawBalls(){
+    for(const b of balls){
+      // trail
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for(const t of b.trail){
+        const alpha = clamp(t.t/60,0,1) * 0.42;
+        const rr = Math.max(1.6, (t.t/60)*6);
+        const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, rr*4);
+        grad.addColorStop(0, hexToRgba(b.color, alpha));
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(t.x,t.y, rr, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.restore();
+
+      // ball
+      ctx.beginPath();
+      ctx.fillStyle = b.color;
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 26;
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
     }
   }
 
-  // pointer & input handling
-  function setupInput(){
-    window.addEventListener('mousemove', (e)=>{
-      // compute canvas-local coords
+  function drawParticles(){
+    for(const p of particles){
+      const alpha = 1 - (p.age / p.life);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.6, p.r * (1 - p.age/p.life)), 0, Math.PI*2);
+      ctx.fill();
+
+      // glow
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = hexToRgba(p.color, alpha*0.18);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawTargets(){
+    for(const t of targets){
+      if(!t.alive) continue;
+      // body
+      ctx.save();
+      ctx.translate(t.x, t.y);
+      ctx.beginPath();
+      ctx.fillStyle = t.color;
+      ctx.shadowColor = t.color;
+      ctx.shadowBlur = 14;
+      ctx.ellipse(0,0, t.rx, t.ry, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // ring
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1.4;
+      ctx.ellipse(0,0, t.rx*1.08, t.ry*1.08, 0, 0, Math.PI*2);
+      ctx.stroke();
+
+      // small health marker
+      ctx.fillStyle = 'rgba(0,0,0,0.06)';
+      ctx.beginPath();
+      ctx.ellipse(-t.rx*0.3, -t.ry*0.6, Math.max(2, t.rx*0.18), Math.max(2, t.ry*0.12), 0, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  // ---------- Utility drawing helpers ----------
+  function lerpColor(a,b,t){
+    const ca = hexToRgb(a), cb = hexToRgb(b);
+    const r = Math.round(ca.r + (cb.r - ca.r) * t);
+    const g = Math.round(ca.g + (cb.g - ca.g) * t);
+    const bl = Math.round(ca.b + (cb.b - ca.b) * t);
+    return `rgb(${r},${g},${bl})`;
+  }
+  function hexToRgb(hex){
+    const c = hex.replace('#','');
+    const i = parseInt(c,16);
+    return { r:(i>>16)&255, g:(i>>8)&255, b:i&255 };
+  }
+  function hexToRgba(hex, a=1){
+    const c = hex.replace('#','');
+    const i = parseInt(c,16);
+    const r=(i>>16)&255, g=(i>>8)&255, b=i&255;
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // ---------- Main loop ----------
+  let last = now();
+  let frameCount = 0;
+  function loop(ts){
+    const tNow = now();
+    const rawDt = tNow - last;
+    const dt = Math.min(40, rawDt) / (1000/60); // normalized to ~60fps scale (dt ~1 per frame)
+    last = tNow;
+    frameCount++;
+
+    // idle/nightrise logic
+    const idle = (Date.now() - lastMoveTS);
+    const nightTarget = clamp((idle - 6000) / 10000, 0, 1); // starts after 6s, full ~16s
+    nightOverlay.style.opacity = (nightTarget * 0.85).toString();
+
+    // update physics
+    update(dt);
+
+    // draw background with night mix
+    drawBackground(nightTarget);
+
+    // ground & fog
+    drawGroundAndFog();
+
+    // fireflies
+    drawFireflies();
+
+    // particles then balls then targets (z-order adjusted)
+    drawParticles();
+    drawBalls();
+    drawTargets();
+
+    // cannon over everything
+    drawCannon();
+
+    // HUD & other effects (cursor handled by DOM element)
+
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Input handling ----------
+  function attachInput(){
+    // mouse move -> map to canvas coords
+    window.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect();
+      // Map to canvas coordinate system
       const cx = (e.clientX - rect.left) * (canvas.width / rect.width) / DPR;
       const cy = (e.clientY - rect.top) * (canvas.height / rect.height) / DPR;
-      // set mouse relative to canvas
       mouse.x = clamp(cx, 0, W);
       mouse.y = clamp(cy, 0, H);
-      // update DOM cursor glow quickly
-      cursorGlow.style.transform = `translate(${e.clientX - 70}px, ${e.clientY - 70}px)`;
       lastMoveTS = Date.now();
+
+      // Move cursor glow DOM element
+      cursorGlow.style.transform = `translate(${e.clientX - 70}px, ${e.clientY - 70}px)`;
     });
 
-    // on click -> shoot
-    window.addEventListener('click', (ev)=>{
-      // if user clicked on calculator or UI, don't shoot
-      const target = ev.target;
-      if(target.closest && (target.closest('.calculator') || target.closest('.topbar') || target.closest('.btn') || target.closest('.calc-toggle') || target.closest('button'))) {
-        return;
-      }
-      spawnBallAtCannon(12 + Math.random()*3);
-      // flash small screen hint
-      bounceGreeting();
+    // shoot on click (but avoid UI elements)
+    window.addEventListener('click', (e) => {
+      const target = e.target;
+      // if clicked inside UI, don't shoot
+      if(target.closest && (target.closest('.calculator') || target.closest('.topbar') || target.closest('.btn') || target.closest('.key'))) return;
+      // if clicked on canvas area -> spawn ball
+      spawnBallFromInput();
     });
 
-    // keyboard shortcuts
-    window.addEventListener('keydown', (e)=>{
-      if(e.key === 'c' || e.key === 'C'){ toggleCalc(); }
-      if(e.key === ' ') { // space shoot
-        spawnBallAtCannon(13);
+    // mousedown & mouseup for charging
+    window.addEventListener('mousedown', (e) => {
+      const target = e.target;
+      if(target.closest && (target.closest('.calculator') || target.closest('.topbar') || target.closest('.btn') || target.closest('.key'))) return;
+      mouse.down = true;
+      mouse.holdingSince = Date.now();
+    });
+    window.addEventListener('mouseup', (e) => {
+      if(mouse.down){
+        spawnBallFromInput();
+      }
+      mouse.down = false;
+      mouse.holdingSince = 0;
+    });
+
+    // keyboard: space to shoot, c to toggle calc
+    window.addEventListener('keydown', (e) => {
+      if(e.key === ' '){
+        e.preventDefault();
+        spawnBallFromInput(13);
+      } else if(e.key === 'c' || e.key === 'C'){
+        toggleCalc();
       }
     });
+
+    // resize
+    window.addEventListener('resize', resize);
   }
 
-  // greeting bounce animation when shot (subtle)
-  function bounceGreeting(){
-    const el = document.querySelector('.greeting');
-    el.style.transition = 'transform 0.25s cubic-bezier(.2,.9,.2,1)';
-    el.style.transform = 'translateX(-50%) translateY(-6px) scale(1.01)';
-    setTimeout(()=>{ el.style.transform = 'translateX(-50%) translateY(0) scale(1)'; }, 200);
+  function spawnBallFromInput(forceOverride){
+    // if clicking while holding we compute hold time
+    let power = 12;
+    if(forceOverride) power = forceOverride;
+    else if(mouse.holdingSince){
+      const hold = clamp((Date.now() - mouse.holdingSince), 0, 1200); // up to 1.2s
+      power = 10 + (hold/1200) * 20;
+    }
+    spawnBall(power);
   }
 
-  // calculator logic
+  // ---------- Collisions (ball with targets) ----------
+  function handleCollisions(){
+    for(let i=balls.length-1;i>=0;i--){
+      const b = balls[i];
+      for(let j=targets.length-1;j>=0;j--){
+        const t = targets[j];
+        if(!t.alive) continue;
+        // ellipse-hit test: transform point into target local coords
+        const dx = b.x - t.x;
+        const dy = b.y - t.y;
+        const nx = dx / t.rx;
+        const ny = dy / t.ry;
+        if((nx*nx + ny*ny) <= 1){
+          // hit!
+          t.health -= 1;
+          // spawn spark at impact
+          spawnExplosion(b.x, b.y, 18);
+          // knockback target a bit
+          t.vx += (b.vx * 0.05);
+          // remove the ball with small pop
+          balls.splice(i,1);
+          if(t.health <= 0){
+            t.alive = false;
+            spawnTargetPop(t.x, t.y);
+            // small score multiplier / combos can be added
+          } else {
+            // small color / wiggle
+            t.color = shadeColor(t.color, -8);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // helper to slightly darken hex color
+  function shadeColor(hex, percent){
+    // convert hsl fallback for random colors - but if hex provided, work naive
+    try {
+      const c = hex.replace('#','');
+      const i = parseInt(c,16);
+      let r = (i>>16)&255, g=(i>>8)&255, b=i&255;
+      r = Math.round(r * (100+percent)/100);
+      g = Math.round(g * (100+percent)/100);
+      b = Math.round(b * (100+percent)/100);
+      r = clamp(r,0,255); g = clamp(g,0,255); b = clamp(b,0,255);
+      return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
+    } catch(e) {
+      return hex;
+    }
+  }
+
+  // ---------- Particle and spawn helpers ----------
+  function spawnExplosion(x,y,count=28){
+    for(let k=0;k<count;k++){
+      const ang = rand(0,Math.PI*2);
+      const sp = rand(1.4,6.2);
+      const col = `hsl(${rand(25,70)},95%,65%)`;
+      particles.push(createParticle(x, y, Math.cos(ang)*sp, Math.sin(ang)*sp, 50 + Math.random()*30, rand(1,3), col));
+    }
+  }
+
+  function createParticle(x,y,vx,vy,life,r,color){
+    return { x,y,vx,vy,life,age:0,r,color };
+  }
+
+  // ---------- Calculator logic (simple) ----------
   let calcValue = '';
-  let calcShown = true;
-  function updateCalcScreen(){
-    calcScreen.textContent = calcValue === '' ? '0' : calcValue;
-  }
-  window.pressKey = function(k){
+  function pressCalcKey(k){
     if(k === 'C'){ calcValue = ''; updateCalcScreen(); return; }
     if(k === 'H'){ calcValue = ''; updateCalcScreen(); return; }
-    if(k === '=') { 
+    if(k === '='){
       try {
-        // evaluate safely (still simple eval, keep it simple)
-        // replace × ÷ with * /
         const expr = calcValue.replace(/×/g,'*').replace(/÷/g,'/');
-        const res = Function('"use strict";return (' + expr + ')')();
+        // use Function to avoid direct eval in some contexts
+        const res = Function('"use strict"; return (' + expr + ')')();
         calcValue = String(res);
       } catch(e){
         calcValue = 'Error';
@@ -838,79 +911,113 @@
       updateCalcScreen();
       return;
     }
-    // normal char
     calcValue += k;
     updateCalcScreen();
   }
-
-  function toggleCalc(){
-    calcShown = !calcShown;
-    calcEl.style.display = calcShown ? 'flex' : 'none';
+  function updateCalcScreen(){
+    document.getElementById('calcScreen').textContent = calcValue === '' ? '0' : calcValue;
   }
 
-  // attach buttons
+  // ---------- Calculator dragging ----------
+  (function setupCalcDrag(){
+    let dragging = false;
+    let startX=0, startY=0, elX=0, elY=0;
+    const el = calcEl;
+    el.addEventListener('mousedown', (e)=>{
+      // only drag when clicking near header (calc-head)
+      const rect = el.getBoundingClientRect();
+      const localY = e.clientY - rect.top;
+      if(localY > 0 && localY < 56){
+        dragging = true;
+        el.classList.add('dragging');
+        startX = e.clientX; startY = e.clientY;
+        elX = rect.left; elY = rect.top;
+        document.body.style.userSelect = 'none';
+      }
+    });
+    window.addEventListener('mousemove', (e)=>{
+      if(!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const nx = elX + dx;
+      const ny = elY + dy;
+      el.style.left = nx + 'px';
+      el.style.top = ny + 'px';
+    });
+    window.addEventListener('mouseup', ()=>{
+      if(dragging){
+        dragging = false;
+        el.classList.remove('dragging');
+        document.body.style.userSelect = 'auto';
+      }
+    });
+  })();
+
+  // ---------- Buttons and UI ----------
   toggleCalcBtn.addEventListener('click', toggleCalc);
-  hideCalc.addEventListener('click', ()=>{ calcShown = false; calcEl.style.display = 'none'; });
-  resetScene.addEventListener('click', ()=>{ balls = []; particles = []; initFireflies(28); });
-  clearBallsBtn.addEventListener('click', ()=>{ balls = []; });
+  hideCalcBtn.addEventListener('click', () => { calcEl.style.display = 'none'; });
+  toggleTargetsBtn.addEventListener('click', () => {
+    showTargets = !showTargets;
+    if(showTargets) { initTargets(6); } else { targets = []; }
+  });
+  clearBallsBtn.addEventListener('click', () => { balls = []; particles = []; });
+  resetBtn.addEventListener('click', () => { resetScene(); });
 
-  // utility to clear everything
-  function resetAll(){ balls=[]; particles=[]; fireflies=[]; initFireflies(28); }
-
-  // cursor "idle" behaviour: shrink / expand
-  let cursorActive = true;
-
-  // simple animation to make cursor glow breathe a bit
-  let glowPhase = 0;
-  function animateCursor(){
-    glowPhase += 0.03;
-    const s = 1 + Math.sin(glowPhase) * 0.04;
-    cursorGlow.style.transform += ` scale(${s})`;
-    requestAnimationFrame(animateCursor);
-  }
-
-  // small helper to start rendering
-  function start(){
-    resizeCanvas();
-    initFireflies(28);
-    setupInput();
-    lastTime = performance.now();
-    requestAnimationFrame(render);
-    // optional: small interval to update cursor DOM transform smoothing
-    setInterval(()=>{ /* keep cursor alive for mobile fallback */ }, 1000);
-  }
-
-  // hex helper to lighten/darken
-  function shade(color, percent){
-    const f = parseInt(color.slice(1),16);
-    const t = percent < 0 ? 0 : 255;
-    const p = Math.abs(percent);
-    const R = f>>16, G = f>>8&0x00FF, B = f&0x0000FF;
-    return "#" + (0x1000000 + (Math.round((t-R)*p)+R)*0x10000 + (Math.round((t-G)*p)+G)*0x100 + (Math.round((t-B)*p)+B)).toString(16).slice(1);
-  }
-
-  // small helper for hexToRgba above already included
-
-  // initial startup
-  window.addEventListener('resize', ()=>{ resizeCanvas(); });
-  resizeCanvas();
-  start();
-
-  // tiny UX: pointer cursor change over UI elements
-  const uiEls = [document.querySelector('.topbar'), calcEl, document.querySelector('.greeting')];
-  uiEls.forEach(u => {
-    u && u.addEventListener('mouseenter', ()=>{ document.body.style.cursor = 'default'; });
-    u && u.addEventListener('mouseleave', ()=>{ document.body.style.cursor = 'crosshair'; });
+  // calculator keybinding
+  document.getElementById('calcKeys').addEventListener('click', (e)=>{
+    const k = e.target.closest('.key');
+    if(!k) return;
+    const key = k.getAttribute('data-key');
+    if(!key) return;
+    if(key === '=') pressCalcKey('=');
+    else pressCalcKey(key);
   });
 
-  // helper: execute render loop after everything set
-  // Render loop already scheduled in start()
+  function toggleCalc(){ calcEl.style.display = (calcEl.style.display === 'none') ? 'block' : 'none'; }
 
-  // small finishing touches:
-  // Show/hide calculator on initial load
-  calcEl.style.display = calcShown ? 'flex' : 'none';
+  // ---------- Reset & init ----------
+  function resetScene(){
+    balls = [];
+    particles = [];
+    score = 0;
+    scoreSpan.textContent = score;
+    initFireflies(32);
+    if(showTargets) initTargets(6);
+  }
 
-})(); // IIFE end
+  // ---------- Utility helpers ----------
+  function spawnTargetPop(x,y){
+    score += 10;
+    scoreSpan.textContent = score;
+    spawnExplosion(x,y,40);
+  }
+
+  // ---------- Collision scheduler (regular) ----------
+  setInterval(() => {
+    // run collision checks in interval to reduce per-frame overhead
+    handleCollisions();
+  }, 50);
+
+  // ---------- Startup ----------
+  function start(){
+    resize();
+    initFireflies(32);
+    if(showTargets) initTargets(6);
+    attachInput();
+    last = now();
+    requestAnimationFrame(loop);
+  }
+
+  // initialize & attach input
+  attachInput();
+  start();
+
+  // expose some functions to console for debug
+  window.__arash = { balls, particles, targets, resetScene, spawnBall, score: () => score };
+
+  /* ------------- End IIFE ------------- */
+})();
+
 </script>
 </body>
 </html>
