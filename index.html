@@ -6,92 +6,120 @@
   <title>Welcome to Arash's Website</title>
   <meta name="description" content="Dynamic website built with GitHub Pages by Arash.">
   <style>
-    /* General styling */
+    /* General Styling */
     body {
       font-family: "Poppins", sans-serif;
       text-align: center;
-      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-      color: #333;
+      background: linear-gradient(135deg, #8fd3f4, #84fab0);
+      color: #222;
       overflow-x: hidden;
       height: 100vh;
       margin: 0;
+      position: relative;
     }
 
     h1 {
-      color: #0066ff;
+      color: #0056ff;
       margin-top: 100px;
-      font-size: 2.5rem;
-      animation: fadeIn 2s ease-in-out;
+      font-size: 2.8rem;
+      letter-spacing: 1px;
+      animation: fadeIn 1.5s ease-in-out;
     }
 
     p {
       font-size: 1.2rem;
-      animation: fadeIn 3s ease-in-out;
+      animation: fadeIn 2.2s ease-in-out;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(25px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Calculator popup button */
+    /* Button */
     .open-btn {
-      background-color: #0070f3;
+      background: linear-gradient(90deg, #0070f3, #00c6ff);
       color: white;
       border: none;
-      padding: 12px 24px;
-      font-size: 1rem;
-      border-radius: 10px;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 12px;
       cursor: pointer;
       margin-top: 30px;
-      transition: background 0.3s;
+      transition: transform 0.2s ease, box-shadow 0.3s;
     }
 
     .open-btn:hover {
-      background-color: #005ad3;
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
-    /* Popup calculator box */
+    /* Calculator Box */
     .calculator {
       position: fixed;
       bottom: -400px;
-      right: 20px;
-      width: 260px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      right: 30px;
+      width: 290px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
       transition: bottom 0.5s ease;
-      padding: 15px;
+      padding: 18px;
     }
 
     .calculator.show {
-      bottom: 20px;
+      bottom: 30px;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      font-size: 1.2rem;
-      margin-bottom: 10px;
+      padding: 12px;
+      font-size: 1.3rem;
+      margin-bottom: 12px;
       text-align: right;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.5);
+      color: #000;
+    }
+
+    /* Buttons Grid */
+    .btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
 
     .btns button {
-      width: 23%;
-      margin: 1%;
-      padding: 10px;
-      font-size: 1rem;
+      padding: 14px 0;
+      font-size: 1.1rem;
       border: none;
-      border-radius: 8px;
-      background: #e6e6e6;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.7);
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.25s ease;
+      font-weight: 500;
     }
 
     .btns button:hover {
-      background: #d1d1d1;
+      background: #00c6ff;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .btns .equal {
+      background: #0070f3;
+      color: #fff;
+    }
+
+    .btns .clear {
+      grid-column: span 4;
+      background: #ff6b6b;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
     }
 
     .bubble {
@@ -120,19 +148,23 @@
       <button onclick="append('8')">8</button>
       <button onclick="append('9')">9</button>
       <button onclick="append('/')">÷</button>
+
       <button onclick="append('4')">4</button>
       <button onclick="append('5')">5</button>
       <button onclick="append('6')">6</button>
       <button onclick="append('*')">×</button>
+
       <button onclick="append('1')">1</button>
       <button onclick="append('2')">2</button>
       <button onclick="append('3')">3</button>
       <button onclick="append('-')">−</button>
+
       <button onclick="append('0')">0</button>
       <button onclick="append('.')">.</button>
-      <button onclick="calcResult()">=</button>
+      <button class="equal" onclick="calcResult()">=</button>
       <button onclick="append('+')">+</button>
-      <button onclick="clearDisplay()" style="width:98%;background:#ff6666;color:white;">Clear</button>
+
+      <button class="clear" onclick="clearDisplay()">Clear</button>
     </div>
   </div>
 
@@ -157,14 +189,14 @@
       display.value = '';
     }
 
-    // ASMR bubble effect
-    for (let i = 0; i < 15; i++) {
+    // Animated background bubbles
+    for (let i = 0; i < 20; i++) {
       let bubble = document.createElement('div');
       bubble.classList.add('bubble');
-      bubble.style.width = bubble.style.height = Math.random()*60 + 10 + 'px';
+      bubble.style.width = bubble.style.height = Math.random()*60 + 20 + 'px';
       bubble.style.left = Math.random()*100 + 'vw';
-      bubble.style.animationDuration = (5 + Math.random()*10) + 's';
-      bubble.style.animationDelay = Math.random()*5 + 's';
+      bubble.style.animationDuration = (6 + Math.random()*8) + 's';
+      bubble.style.animationDelay = Math.random()*4 + 's';
       document.body.appendChild(bubble);
     }
   </script>
