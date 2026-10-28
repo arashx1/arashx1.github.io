@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#08070e" />
+    <meta
+      name="description"
+      content="Arashdeep Singh — creative developer and Computer Science student. Explore a world of accessible products, physics, and curious experiments."
+    />
+    <title>ARASH — Built from curiosity.</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+    <script src="experience.js" defer></script>
+    <script src="motion.js" defer></script>
+    <script src="particles.js" defer></script>
+    <script src="scene.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="header header-minimal">
+      <a class="contact-link" href="#contact">Let’s talk <span>↗</span></a
+      >
+    </header>
+    <main id="main">
+      <section class="hero" id="home" aria-labelledby="hero-title">
+        <div class="hero-top">
+          <span class="eyebrow"
+            ><i class="live-dot"></i> INDEPENDENT MIND. ALWAYS IN MOTION.</span
+          ><span class="hero-coordinate"
+            >AMRITSAR, IN <span id="local-time"></span
+          ></span>
+        </div>
+        <div class="hero-body">
+          <div class="hero-copy">
+            <span class="index-label"
+              >ARASHDEEP SINGH / CREATIVE DEVELOPER</span
+            >
+            <h1 id="hero-title" aria-label="Curiosity in motion">
+              Curiosity,<br /><em>in motion.</em>
+            </h1>
+            <p>Ideas you can feel. Things you can use.</p>
+            <div class="hero-actions">
+              <a class="button accent-button" href="#work"
+                >Enter the work <span>↗</span></a
+              ><a class="plain-link" href="#playground">Play <span>↘</span></a>
+            </div>
+          </div>
+          <div class="engine-stage" id="hero-stage">
+            <canvas
+              id="engine"
+              tabindex="0"
+              role="img"
+              aria-label="Interactive 3D curiosity sculpture. Drag to rotate. Use arrow keys to rotate, or press Space to change shape."
+            ></canvas>
+            <div class="engine-ring" aria-hidden="true"></div>
+            <span class="stage-label">CURIOSITY ENGINE — 001</span
+            ><span class="stage-corner">[ LIVE EXPERIMENT ]</span>
+            <div class="engine-caption">
+              <span class="engine-indicator"></span
+              ><span id="engine-caption"
+                >HUMAN-CENTERED / CONNECTING THE DOTS</span
+              >
+            </div>
+            <button class="engine-hint" id="hero-morph">
+              ↔ Drag to rotate <span>·</span> Click to transform ↗
+            </button>
+          </div>
+        </div>
+        <div class="hero-bottom">
+          <span>LESS TALK. MORE MAKING.</span
+          ><a href="#work">SCROLL TO DISCOVER <span>↓</span></a
+          ><span class="hero-counter">01 — 05</span>
+        </div>
+        <div class="giant-name" aria-hidden="true">ARASH<span>✳</span></div>
+      </section>
+      <div class="ticker" aria-hidden="true">
+        <div>
+          CURIOUS BY NATURE <span>✳</span> BUILDER BY CHOICE
+          <span>✳</span> IDEAS INTO INTERFACES <span>✳</span> CURIOUS BY
+          NATURE <span>✳</span> BUILDER BY CHOICE <span>✳</span> IDEAS INTO
+          INTERFACES <span>✳</span>
+        </div>
+      </div>
+      <section class="work section" id="work" aria-labelledby="work-title">
+        <div class="section-meta">
+          <span>01 / SELECTED WORK</span
+          ><span>A FEW THINGS I’VE PUT INTO THE WORLD ↙</span>
+        </div>
+        <div class="section-heading">
+          <h2 id="work-title">
+            Ideas don’t ship.<br /><span class="muted">Builders do.</span>
+          </h2>
+          <p>
+            Care tools. Neural networks. Quantum experiments.<br />A little
+            range. A lot of curiosity.
+          </p>
+        </div>
+        <div
+          class="project-filters"
+          role="group"
+          aria-label="Filter selected projects"
+        >
+          <button data-filter="all" class="active" aria-pressed="true">
+            All experiments <sup>04</sup></button
+          ><button data-filter="product" aria-pressed="false">
+            Human-centered</button
+          ><button data-filter="science" aria-pressed="false">
+            Science & AI
+          </button>
+        </div>
+        <div class="projects" id="projects"></div>
+        <a
+          class="github-more"
+          href="https://github.com/arashx1"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><span>THE EXPERIMENTS DON’T STOP HERE.</span
+          ><strong>More on GitHub ↗</strong></a
+        >
+      </section>
+      <section class="about section" id="about" aria-labelledby="about-title">
+        <div class="section-meta">
+          <span>02 / THE HUMAN</span
+          ><span>STILL LEARNING. ALREADY BUILDING.</span>
+        </div>
+        <div class="about-layout">
+          <div class="identity-card">
+            <div class="id-top">
+              <span>BUILDER’S LICENSE</span><span>AS / 026</span>
+            </div>
+            <div class="identity-graphic" aria-hidden="true">
+              <span>a</span>
+              <div class="id-orbit"></div>
+              <b>✳</b>
+            </div>
+            <h3>Arashdeep Singh</h3>
+            <p>AMRITSAR, PUNJAB, INDIA</p>
+            <div class="id-bottom">
+              <div class="barcode" aria-hidden="true"></div>
+              <span>CURIOUS.<br />BY DEFAULT.</span>
+            </div>
+          </div>
+          <div class="about-copy">
+            <h2 id="about-title">
+              A work<br />in <em>progress.</em><span class="accent">↗</span>
+            </h2>
+            <p class="lead">
+              I like the moment an idea stops being a “what if” and becomes
+              something someone can use.
+            </p>
+            <p>
+              I’m a Computer Science student at Guru Nanak Dev University. I
+              explore product design, AI-assisted development, and the space
+              where science meets software.
+            </p>
+            <p>
+              Sometimes that means a calmer care companion. Sometimes, teaching
+              a neural network the laws of heat. The common thread? Learn by
+              making.
+            </p>
+            <div class="about-facts">
+              <div>
+                <span>THE MINDSET</span
+                ><strong>Build. Break. Understand.</strong>
+              </div>
+              <div>
+                <span>THE NEXT CHAPTER</span
+                ><strong>Open to meaningful collaborations ↗</strong>
+              </div>
+            </div>
+            <a
+              class="plain-link"
+              href="https://www.linkedin.com/in/arashx"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Meet me on LinkedIn ↗</a
+            >
+          </div>
+        </div>
+      </section>
+      <section
+        class="playground section"
+        id="playground"
+        aria-labelledby="play-title"
+      >
+        <div class="section-meta">
+          <span>03 / THE CURIOSITY ENGINE</span
+          ><span>PLEASE TOUCH THE EXHIBIT.</span>
+        </div>
+        <div class="play-heading">
+          <h2 id="play-title">
+            One mind.<br /><span class="muted">Different dimensions.</span>
+          </h2>
+          <p>
+            This is my superpower: connecting ideas.<br />Choose a dimension.
+            Watch the connections change.
+          </p>
+        </div>
+        <div class="lab">
+          <div class="lab-visual">
+            <canvas
+              id="lab-canvas"
+              tabindex="0"
+              role="img"
+              aria-label="Interactive 3D particle sculpture. Drag or use arrow keys to rotate. Space changes dimensions."
+            ></canvas
+            ><span class="lab-label">AS / GENERATIVE OBJECT</span
+            ><span class="lab-coordinate" id="shape-code">FORM_01 / TORUS</span>
+            <div class="lab-instructions">
+              DRAG TO ORBIT <span>·</span> ARROW KEYS ALSO WORK
+            </div>
+          </div>
+          <div class="lab-panel">
+            <span class="index-label">SELECT A DIMENSION</span>
+            <div
+              class="dimension-tabs"
+              role="group"
+              aria-label="Choose sculpture dimension"
+            >
+              <button data-mode="0" class="active" aria-pressed="true">
+                <span>01</span> The human <b>↗</b></button
+              ><button data-mode="1" aria-pressed="false">
+                <span>02</span> The scientist <b>↗</b></button
+              ><button data-mode="2" aria-pressed="false">
+                <span>03</span> The explorer <b>↗</b>
+              </button>
+            </div>
+            <div class="dimension-story" aria-live="polite">
+              <span id="dimension-tag">EMPATHY → INTERFACES</span>
+              <h3 id="dimension-title">
+                Technology should<br />feel a little more human.
+              </h3>
+              <p id="dimension-copy">
+                Haven grew from a simple question: how can software make daily
+                care feel calmer? The connected ring represents routines,
+                memories, and people supporting one another.
+              </p>
+              <a
+                id="dimension-link"
+                href="https://github.com/arashx1/haven"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Explore Haven ↗</a
+              >
+            </div>
+            <div class="lab-controls">
+              <label for="energy"
+                >ENERGY <output id="energy-output">50%</output></label
+              ><input
+                id="energy"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+              /><button id="pause-engine" aria-pressed="false">
+                Ⅱ Pause rotation</button
+              ><button id="reset-engine">↺ Reset view</button>
+            </div>
+          </div>
+        </div>
+        <div class="play-footnote">
+          <span>BUILT WITH MATH, PARTICLES & A LITTLE PERSONALITY.</span
+          ><span>NO TWO PERSPECTIVES ARE THE SAME. ↗</span>
+        </div>
+      </section>
+      <section
+        class="toolkit section"
+        id="toolkit"
+        aria-labelledby="toolkit-title"
+      >
+        <div class="section-meta">
+          <span>04 / MY TOOLKIT</span
+          ><span>ALWAYS ROOM FOR ONE MORE TOOL.</span>
+        </div>
+        <div class="toolkit-layout">
+          <h2 id="toolkit-title">The tools<br />behind the <em>ideas.</em></h2>
+          <div class="skill-rows">
+            <div>
+              <span>01 / INTERFACES</span>
+              <p>
+                React <i>·</i> TypeScript <i>·</i> JavaScript <i>·</i> HTML &
+                CSS
+              </p>
+            </div>
+            <div>
+              <span>02 / LOGIC & DATA</span>
+              <p>Python <i>·</i> FastAPI <i>·</i> SQL <i>·</i> PostgreSQL</p>
+            </div>
+            <div>
+              <span>03 / EXPERIMENTS</span>
+              <p>Qiskit <i>·</i> PINNs <i>·</i> OpenCV <i>·</i> MediaPipe</p>
+            </div>
+            <div>
+              <span>04 / BUILD & SHIP</span>
+              <p>
+                Git & GitHub <i>·</i> Vite <i>·</i> Vercel <i>·</i> AI-assisted
+                workflows
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        class="contact section"
+        id="contact"
+        aria-labelledby="contact-title"
+      >
+        <div class="section-meta">
+          <span>05 / THE NEXT CHAPTER</span
+          ><span><i class="live-dot"></i> OPEN TO COLLABORATE</span>
+        </div>
+        <div class="contact-main">
+          <span class="contact-star" aria-hidden="true">✳</span>
+          <p>A GOOD CONVERSATION IS A PRETTY GOOD START.</p>
+          <h2 id="contact-title">Let’s build<br />something <em>real.</em></h2>
+          <a class="email-link" href="mailto:js8252946@gmail.com"
+            >js8252946@gmail.com <span>↗</span></a
+          >
+          <div class="contact-actions">
+            <button id="copy-email">Copy email ⧉</button
+            ><a
+              href="https://github.com/arashx1"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub ↗</a
+            ><a
+              href="https://www.linkedin.com/in/arashx"
+              target="_blank"
+              rel="noopener noreferrer"
+              >LinkedIn ↗</a
+            >
+          </div>
+          <p id="copy-status" role="status"></p>
+        </div>
+        <footer>
+          <a class="wordmark" href="#home">arash<span>®</span><i></i></a
+          ><span
+            >© 2026 ARASHDEEP SINGH<br />MADE WITH CURIOSITY. ALWAYS IN
+            PROGRESS.</span
+          ><button id="motion-toggle" aria-pressed="false">Motion: on</button
+          ><a href="#home">Back to the top ↑</a>
+        </footer>
+      </section>
+    </main>
+    <dialog id="project-dialog" aria-labelledby="dialog-title">
+      <button class="dialog-close" aria-label="Close project details">×</button>
+      <div id="dialog-content"></div>
+    </dialog>
+    <div class="scroll-progress" aria-hidden="true"></div>
+  </body>
+</html>
