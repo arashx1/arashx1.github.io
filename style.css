@@ -4036,3 +4036,11 @@ body:has(dialog[open]) .live-cursor {
 
 .header.header-minimal{justify-content:flex-end;height:72px;background:transparent;border:0;box-shadow:none;backdrop-filter:none;animation:none;pointer-events:none}
 .header-minimal .contact-link{pointer-events:auto;margin-left:0}
+
+.serpent-scene{position:fixed;inset:0;width:100%;height:100%;z-index:19;pointer-events:none;opacity:0;transition:opacity 1s;mask-image:linear-gradient(90deg,transparent 8%,#0005 38%,#000 70%);filter:drop-shadow(0 0 5px #bd6cff70) drop-shadow(0 0 18px #9745ff35)}
+.serpent-scene.serpent-visible{opacity:.94}
+#dragon-toggle{background:none;font-size:10px;color:inherit;padding:5px;border-radius:5px;cursor:pointer}
+body:has(dialog[open]) .serpent-scene{visibility:hidden}
+.reduced-motion .serpent-scene{display:none}
+@media(max-width:700px){.serpent-scene.serpent-visible{opacity:.72}.serpent-scene{mask-image:linear-gradient(90deg,transparent 25%,#0009 80%)}}
+@media(prefers-reduced-motion:reduce){.serpent-scene{display:none}}
