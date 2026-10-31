@@ -4068,3 +4068,15 @@ body{background:#1d211a}.header.header-minimal{background:transparent}
 .solid-creature{mask-image:none}
 
 .dragon-credit{font-size:10px;opacity:.65}.dragon-credit:hover{opacity:1}
+
+/* One continuous cinematic dragon behind every chapter. */
+body{isolation:isolate;background:#34382f}
+.dragon-backdrop{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:.66}
+.dragon-backdrop .solid-creature{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;cursor:default;mask-image:linear-gradient(90deg,transparent 5%,#0008 35%,#000 65%)}
+main{position:relative;z-index:1}
+.hero{background:linear-gradient(90deg,#34382ff5 0%,#34382fbb 32%,#34382f12 70%)}
+.section,.about,.playground,.contact,.process-story{background-color:#262b2394;backdrop-filter:none}
+.hero .engine-stage{pointer-events:none}.hero .floating-project{pointer-events:auto}
+#hero-morph{display:none!important}
+body:has(dialog[open]) .dragon-backdrop{opacity:.15}
+@media(max-width:700px){.dragon-backdrop{opacity:.43}.hero{background:linear-gradient(90deg,#34382fe0,#34382f40)}.dragon-backdrop .solid-creature{mask-image:linear-gradient(90deg,transparent,#000 55%)}}
