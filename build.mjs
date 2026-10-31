@@ -13,6 +13,8 @@ const assets = [
   "particles.js",
   "scene.js",
   "creature-3d.js",
+  "dragon.glb",
+  "DRAGON-LICENSE.txt",
   "three.module.js",
   "icon.svg",
   "THREE-LICENSE.txt",

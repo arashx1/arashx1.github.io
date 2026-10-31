@@ -4061,3 +4061,10 @@ body{background:#1d211a}.header.header-minimal{background:transparent}
 @media(max-width:700px){.hero .engine-stage{z-index:0}.hero .solid-stage .floating-project{width:95px}.hero .solid-stage .floating-title{font-size:12px}}
 
 .solid-creature{mask-image:linear-gradient(90deg,transparent,#000 9%,#000 98%,transparent)}
+
+/* Render a single solid dragon from first paint; no wireframe precursor. */
+#hero-stage #engine,#hero-stage .engine-ring{display:none!important}
+.hero .float-care{top:3%;left:1%;width:105px}.hero .float-science{bottom:3%;right:0;width:105px}
+.solid-creature{mask-image:none}
+
+.dragon-credit{font-size:10px;opacity:.65}.dragon-credit:hover{opacity:1}
