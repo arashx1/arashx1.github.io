@@ -14,27 +14,27 @@ if (renderer) {
   oldEngine.hidden = true;
   const canvas = renderer.domElement;
   canvas.className = 'solid-creature';
-  canvas.tabIndex = 0;
+  canvas.setAttribute('aria-hidden', 'true');
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', 'Loading detailed 3D dragon sculpture.');
-  host.prepend(canvas);
+  const backdrop=document.createElement('div');backdrop.className='dragon-backdrop';backdrop.setAttribute('aria-hidden','true');backdrop.append(canvas);document.body.prepend(backdrop);
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2('#484b42', .022);
+
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 60);
   camera.position.set(0, .2, 8.7);
-  scene.add(new THREE.HemisphereLight('#f1f0d6', '#11160d', 1.3));
-  const key = new THREE.DirectionalLight('#fff9df', 3.2);
+  scene.add(new THREE.HemisphereLight('#eee6ff', '#10091d', 1.6));
+  const key = new THREE.DirectionalLight('#eee2ff', 3.1);
   key.position.set(-3, 5, 5); scene.add(key);
-  const rim = new THREE.DirectionalLight('#a0b78e', 2.5);
+  const rim = new THREE.DirectionalLight('#a56aff', 4.5);
   rim.position.set(4, 1, -3); scene.add(rim);
 
   // Scanned dragon sculpture: Stanford / McGuire, distributed by Khronos.
   const group = new THREE.Group(); scene.add(group);
-  const skin = new THREE.MeshStandardMaterial({color:'#757b60',roughness:.67,metalness:.12});
+  const skin = new THREE.MeshStandardMaterial({color:'#8060b4',emissive:'#24103e',emissiveIntensity:.22,roughness:.53,metalness:.16});
   async function loadDragon() {
     const response = await fetch('./dragon.glb');
     if (!response.ok) throw new Error('Dragon asset unavailable');
@@ -62,27 +62,36 @@ if (renderer) {
   }
   loadDragon().catch(error=>{console.error(error);canvas.hidden=true;host.classList.add('webgl-unavailable');});
   group.rotation.set(.04,-.32,0);
-  let targetX=.04,targetY=-.32,dragging=false,px=0,py=0,visible=true,previous=0;
-  canvas.style.touchAction='pan-y';
-  canvas.addEventListener('pointerdown',e=>{dragging=true;px=e.clientX;py=e.clientY;canvas.setPointerCapture(e.pointerId);});
-  canvas.addEventListener('pointermove',e=>{if(!dragging)return;targetY+=(e.clientX-px)*.007;targetX+=(e.clientY-py)*.004;px=e.clientX;py=e.clientY;});
-  canvas.addEventListener('pointerup',()=>dragging=false);
-  canvas.addEventListener('pointercancel',()=>dragging=false);
-  canvas.addEventListener('keydown',e=>{if(!e.key.startsWith('Arrow'))return;e.preventDefault();if(e.key==='ArrowLeft')targetY-=.15;if(e.key==='ArrowRight')targetY+=.15;if(e.key==='ArrowUp')targetX-=.15;if(e.key==='ArrowDown')targetX+=.15;});
-  new IntersectionObserver(entries=>visible=entries[0].isIntersecting).observe(host);
-  new ResizeObserver(()=>{const r=host.getBoundingClientRect();renderer.setSize(r.width,r.height);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();camera.position.z=r.width<450?10.5:8.7;}).observe(host);
-  const toggle=document.createElement('button');toggle.id='dragon-toggle';toggle.textContent='3D form: on';toggle.setAttribute('aria-pressed','true');document.querySelector('.contact footer').append(toggle);
+  let pointerX=0,pointerY=0,previous=0;
+  window.addEventListener('pointermove',event=>{
+    pointerX=event.clientX/innerWidth-.5;pointerY=event.clientY/innerHeight-.5;
+  },{passive:true});
+  function resizeBackdrop() {
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/Math.max(1,innerHeight);
+    camera.position.z=innerWidth<700?7.6:6.2;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize',resizeBackdrop,{passive:true});resizeBackdrop();
+  const toggle=document.createElement('button');toggle.id='dragon-toggle';toggle.textContent='Dragon motion: on';toggle.setAttribute('aria-pressed','true');document.querySelector('.contact footer').append(toggle);
   const credit=document.createElement('a');credit.href='./DRAGON-LICENSE.txt';credit.textContent='Dragon scan: Stanford / McGuire';credit.className='dragon-credit';document.querySelector('.contact footer').append(credit);
   let enabled=true;
-  toggle.addEventListener('click',()=>{enabled=!enabled;canvas.hidden=!enabled;toggle.textContent=enabled?'3D form: on':'3D form: off';toggle.setAttribute('aria-pressed',String(enabled));});
-  document.querySelector('#hero-morph').textContent='Drag to explore · Scroll to orbit ↗';
+  toggle.addEventListener('click',()=>{enabled=!enabled;canvas.hidden=!enabled;toggle.textContent=enabled?'Dragon motion: on':'Dragon motion: off';toggle.setAttribute('aria-pressed',String(enabled));});
+
   window.addFrameTask(time=>{
-    if(!visible||!enabled)return;
+    if(!enabled)return;
     const calm=window.matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('reduced-motion');
     const dt=Math.min(50,time-previous||32)/32;previous=time;
-    group.rotation.y+=(targetY+ (calm?0:scrollY*.00055+Math.sin(time*.00012)*.12)-group.rotation.y)*.055*dt;
-    group.rotation.x+=(targetX-group.rotation.x)*.055*dt;
-    group.position.y=calm?0:Math.sin(time*.00035)*.055;
+    const progress=scrollY/Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    const phase=progress*Math.PI*3;
+    const targetY=-.22+(calm?0:Math.sin(phase)*.45+pointerX*.22+Math.sin(time*.00016)*.08);
+    const targetX=.06+(calm?0:pointerY*.08+Math.sin(phase)*.05);
+    group.rotation.y+=(targetY-group.rotation.y)*.04*dt;
+    group.rotation.x+=(targetX-group.rotation.x)*.04*dt;
+    group.rotation.z=calm?-.1:Math.sin(phase*.6)*.09-.1;
+    const targetPosition=innerWidth<700?.8:1.65;
+    group.position.x+=(targetPosition+(calm?0:Math.sin(phase)*.65+pointerX*.15)-group.position.x)*.035*dt;
+    group.position.y=calm?-.1:Math.sin(time*.0004)*.1+Math.sin(phase)*.3-.1;
     renderer.render(scene,camera);
   });
 }
