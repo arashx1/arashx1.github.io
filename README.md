@@ -67,3 +67,7 @@ AWS has NOT been provisioned or deployed by this local build. After deployment, 
 - Check LinkedIn, email, repository links, project dialogs, filters, keyboard operation, and reduced motion.
 
 See `SUBMISSION.md` for a draft to complete using real deployment evidence.
+
+## Olive-grey 3D revision
+
+The hero now renders a solid moss-textured sculpture with Three.js 0.160.0, bundled locally in three.module.js under its included MIT license. creature-3d.js handles the perspective camera, material, bump texture, instanced surface details, lighting, drag and scroll orbit. The former neon wireframe overlay is removed. The palette uses the supplied olive-grey swatch (#484b42) with warm off-white and sage accents.

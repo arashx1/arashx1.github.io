@@ -207,10 +207,10 @@
           Math.abs(point.x - point.homeX) + Math.abs(point.y - point.homeY);
         ctx.fillStyle =
           point.glyph % 7 === 0
-            ? "#7cf6ef"
+            ? "#bec5ad"
             : point.glyph % 3 === 0
-              ? "#e8c4ff"
-              : "#ac7cff";
+              ? "#e4e7dc"
+              : "#c2c9b2";
         ctx.fillText(glyphs[point.glyph], point.x, point.y);
       }
       this.dirty = false;

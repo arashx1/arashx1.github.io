@@ -165,12 +165,12 @@ function renderScene(time) {
       mote.x - scenePointer.x,
       mote.y - scenePointer.y,
     );
-    ctx.fillStyle = `rgba(196,172,255,${0.12 + mote.depth * 0.25})`;
+    ctx.fillStyle = `rgba(216,221,206,${0.12 + mote.depth * 0.25})`;
     ctx.beginPath();
     ctx.arc(mote.x + drift, mote.y, 0.65 + mote.depth * 0.6, 0, Math.PI * 2);
     ctx.fill();
     if (scenePointer.active && distance < 145 && connections++ < 12) {
-      ctx.strokeStyle = `rgba(172,132,245,${(1 - distance / 145) * 0.13})`;
+      ctx.strokeStyle = `rgba(193,200,177,${(1 - distance / 145) * 0.13})`;
       ctx.lineWidth = 0.6;
       ctx.beginPath();
       ctx.moveTo(mote.x + drift, mote.y);
@@ -206,130 +206,4 @@ for (const node of textNodes) {
 document
   .querySelectorAll(".section-meta")
   .forEach((meta) => meta.classList.add("scene-metadata"));
-
-// A depth-sorted, swept 3D mesh: scroll travels along the serpent's coils.
-(() => {
-  const canvas = document.createElement('canvas');
-  canvas.className = 'serpent-scene';
-  canvas.setAttribute('aria-hidden', 'true');
-  document.body.append(canvas);
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  let width = innerWidth, height = innerHeight, travel = scrollY * .001;
-  let enabled = true, visible = true, last = 0;
-  try { enabled = localStorage.getItem('arash-dragon') !== 'off'; } catch {}
-  const toggle = document.createElement('button');
-  toggle.id = 'dragon-toggle';
-  toggle.type = 'button';
-  function sync() {
-    toggle.textContent = enabled ? 'Dragon: on' : 'Dragon: off';
-    toggle.setAttribute('aria-pressed', String(enabled));
-  }
-  toggle.addEventListener('click', () => {
-    enabled = !enabled;
-    try { localStorage.setItem('arash-dragon', enabled ? 'on' : 'off'); } catch {}
-    sync();
-  });
-  document.querySelector('.contact footer').append(toggle);
-  sync();
-  function resize() {
-    width = innerWidth; height = innerHeight;
-    const ratio = Math.min(devicePixelRatio || 1, 1.35);
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-  }
-  window.addEventListener('resize', resize);
-  window.addEventListener('scroll', () => { visible = true; }, { passive: true });
-  resize();
-
-  const dot = (a, b) => a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
-  const normalize = v => { const n=Math.hypot(...v)||1; return v.map(x=>x/n); };
-  const cross = (a,b) => [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
-  function center(t, phase) {
-    return [Math.sin(t*1.52+phase)*1.2+t*.25, t*.57+Math.sin(t*2.1+phase)*.24, Math.cos(t*1.52+phase)*.9];
-  }
-  addFrameTask(time => {
-    if (!enabled || calmMotion() || !visible) {
-      canvas.classList.remove('serpent-visible');
-      return;
-    }
-    canvas.classList.add('serpent-visible');
-    const dt=Math.min(50,time-last||32)/32; last=time;
-    travel+=(scrollY*.0018-travel)*.065*dt;
-    const phase=travel+time*.000055;
-    const rings=width<700?100:160, sides=16;
-    const angle=.35+Math.sin(time*.00008)*.12;
-    const ca=Math.cos(angle),sa=Math.sin(angle);
-    const scale=Math.min(width*.39,height*.48);
-    function project(p) {
-      const x=p[0]*ca+p[2]*sa, z=-p[0]*sa+p[2]*ca;
-      const perspective=5/(5-z);
-      return {x:width*.72+x*scale*perspective,y:height*.51+p[1]*scale*perspective,z};
-    }
-    const grid=[];
-    for(let i=0;i<=rings;i++) {
-      const t=-3.4+i/rings*6.8;
-      const c=center(t,phase),next=center(t+.002,phase);
-      const tangent=normalize(next.map((v,k)=>v-c[k]));
-      const normal=normalize(cross(tangent,[0,0,1]));
-      const binormal=cross(tangent,normal);
-      const taper=.55+.45*Math.sin(Math.PI*i/rings);
-      const radius=(.16+.035*Math.sin(t*3+phase))*taper;
-      const ring=[];
-      for(let j=0;j<sides;j++) {
-        const a=j/sides*Math.PI*2;
-        const ridge=1+.045*Math.sin(i*1.8+j*2.3);
-        const radial=normal.map((v,k)=>v*Math.cos(a)+binormal[k]*Math.sin(a));
-        const world=c.map((v,k)=>v+radial[k]*radius*ridge);
-        ring.push({...project(world),light:Math.max(.05,dot(radial,normalize([-.5,-.7,1])))});
-      }
-      grid.push(ring);
-    }
-    const faces=[];
-    for(let i=0;i<rings;i++) for(let j=0;j<sides;j++) {
-      const k=(j+1)%sides, vertices=[grid[i][j],grid[i+1][j],grid[i+1][k],grid[i][k]];
-      faces.push({vertices,z:vertices.reduce((s,p)=>s+p.z,0)/4,light:(vertices[0].light+vertices[2].light)/2,i,j});
-    }
-    faces.sort((a,b)=>a.z-b.z);
-    ctx.clearRect(0,0,width,height);
-    for(const face of faces) {
-      const l=face.light;
-      ctx.beginPath();
-      face.vertices.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-      ctx.closePath();
-      ctx.fillStyle=`rgba(${Math.round(15+l*37)},${Math.round(10+l*20)},${Math.round(25+l*54)},.94)`;
-      ctx.fill();
-      ctx.strokeStyle=face.j % 4 === 0 ? `rgba(112,255,232,${.35+l*.5})` : `rgba(186,116,255,${.38+l*.5})`;
-      ctx.lineWidth=.85;ctx.stroke();
-      // Flecks follow the surface rather than floating above the mesh.
-      if((face.i*7+face.j*13)%19===0) {
-        const p=face.vertices[0];
-        ctx.fillStyle=(face.i+face.j)%4===0?'#9affee':'#ddb3ff';
-        ctx.fillRect(p.x,p.y,1.4+l*1.6,1.4+l*1.6);
-      }
-    }
-    // A luminous second pass keeps the neon edges visible over the shaded mesh.
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.shadowBlur = 9;
-    for (let side = 0; side < sides; side += 4) {
-      ctx.strokeStyle = side % 8 === 0 ? '#67ffe2' : '#d16bff';
-      ctx.shadowColor = ctx.strokeStyle;
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      grid.forEach((ring, index) => index ? ctx.lineTo(ring[side].x, ring[side].y) : ctx.moveTo(ring[side].x, ring[side].y));
-      ctx.stroke();
-    }
-    ctx.shadowBlur = 4;
-    ctx.strokeStyle = '#bd79ff99';
-    ctx.lineWidth = .7;
-    for (let index = 0; index <= rings; index += 5) {
-      ctx.beginPath();
-      grid[index].forEach((point, i) => i ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
-      ctx.closePath(); ctx.stroke();
-    }
-    ctx.restore();
-  });
-})();
 

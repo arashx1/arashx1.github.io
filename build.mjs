@@ -12,7 +12,10 @@ const assets = [
   "motion.js",
   "particles.js",
   "scene.js",
+  "creature-3d.js",
+  "three.module.js",
   "icon.svg",
+  "THREE-LICENSE.txt",
 ];
 for (const file of assets) await copyFile(file, `dist/${file}`);
 console.log("Static portfolio built in dist/");

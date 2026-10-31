@@ -353,16 +353,16 @@ class Sculpture {
       cy = h * (this.hero ? 0.47 : 0.5),
       scale = Math.min(w * 0.3, h * 0.34);
     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, scale * 1.65);
-    glow.addColorStop(0, "rgba(155,86,255,0.12)");
-    glow.addColorStop(1, "rgba(155,86,255,0)");
+    glow.addColorStop(0, "rgba(177,185,156,0.12)");
+    glow.addColorStop(1, "rgba(177,185,156,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, h);
     ctx.save();
     ctx.translate(cx, cy + scale * 0.99);
     ctx.scale(1, 0.16);
     const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, scale * 1.3);
-    shadow.addColorStop(0, "rgba(124,92,255,.14)");
-    shadow.addColorStop(1, "rgba(124,92,255,0)");
+    shadow.addColorStop(0, "rgba(179,187,160,.14)");
+    shadow.addColorStop(1, "rgba(179,187,160,0)");
     ctx.fillStyle = shadow;
     ctx.beginPath();
     ctx.arc(0, 0, scale * 1.3, 0, TAU);
@@ -391,9 +391,9 @@ class Sculpture {
     for (const p of projected) {
       const bright = Math.max(0.1, Math.min(1, (p.z + 1.8) / 3.2));
       const sparkle = p.i % 29 === 0;
-      const r = sparkle ? 124 : Math.round(93 + 105 * bright),
-        g = sparkle ? 246 : Math.round(45 + 108 * bright),
-        b = sparkle ? 239 : 255;
+      const r = sparkle ? 223 : Math.round(112 + 105 * bright),
+        g = sparkle ? 232 : Math.round(125 + 108 * bright),
+        b = sparkle ? 198 : Math.round(96 + 90 * bright);
       ctx.fillStyle = `rgba(${r},${g},${b},${0.23 + bright * 0.75})`;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * (sparkle ? 1.5 : 1), 0, TAU);
