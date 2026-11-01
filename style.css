@@ -4082,3 +4082,19 @@ body:has(dialog[open]) .dragon-backdrop{opacity:.15}
 @media(max-width:700px){.dragon-backdrop{opacity:.43}.hero{background:linear-gradient(90deg,#1f1628e0,#1f162840)}.dragon-backdrop .solid-creature{mask-image:linear-gradient(90deg,transparent,#000 55%)}}
 
 :root{--bg:#0b0811;--panel:#1c1428;--paper:#f3edff;--muted:#b6a7c9;--accent:#bc8aff}body{background:#110c19}.hero h1 em{color:#d3b3ff}.hero .accent-button{background:#bc8aff;color:#1a1028}.chapter-dock{background:#1b1229ee;border-color:#ba86ff55}.particle-signature canvas,#lab-canvas{filter:hue-rotate(190deg)}
+
+/* Impeccable polish: keep the purple world coherent while giving every control a clear, tactile state. */
+body{background:#110c19;color:var(--paper);overflow-x:hidden}
+.hero{background:linear-gradient(90deg,#120b1cf5 0%,#1c1230d9 38%,#120b1c22 74%)}
+.section,.about,.playground,.contact,.process-story{background-color:#120c1dd9}
+.about,.contact{background:#120c1d}
+:where(a,button,input,textarea,select,[tabindex]):focus-visible{outline:2px solid #d0a8ff;outline-offset:5px;box-shadow:0 0 0 6px #b77aff2b}
+.hero .accent-button,.chapter-dock a,.contact-link{transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease,background-color .28s ease}
+.hero .accent-button:hover,.chapter-dock a:hover,.contact-link:hover{transform:translateY(-3px);box-shadow:0 12px 26px #6c3da84a}
+.hero .accent-button:active,.chapter-dock a:active,.contact-link:active{transform:translateY(-1px) scale(.98)}
+::selection{background:#b77aff66;color:#fff}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#0d0815}
+::-webkit-scrollbar-thumb{background:#6f4f99;border:2px solid #0d0815;border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:#a880da}
+@media(max-width:700px){.dragon-backdrop{opacity:.5}.hero{background:linear-gradient(90deg,#120b1cf0 0%,#1c1230d0 55%,#120b1c40 100%)}.section,.about,.playground,.contact,.process-story{background-color:#120c1df0}}
