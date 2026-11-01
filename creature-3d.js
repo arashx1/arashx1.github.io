@@ -26,15 +26,15 @@ if (renderer) {
 
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 60);
   camera.position.set(0, .2, 8.7);
-  scene.add(new THREE.HemisphereLight('#e1e6c9', '#131513', 1.5));
-  const key = new THREE.DirectionalLight('#eeecd8', 3.3);
+  scene.add(new THREE.HemisphereLight('#eee3ff', '#10091d', 1.5));
+  const key = new THREE.DirectionalLight('#eee2ff', 3.3);
   key.position.set(-1, 3, 6); scene.add(key);
   const rim = new THREE.DirectionalLight('#9a78c4', 3.0);
   rim.position.set(4, 1, -3); scene.add(rim);
 
   // Scanned dragon sculpture: Stanford / McGuire, distributed by Khronos.
   const group = new THREE.Group(); scene.add(group);
-  const skin = new THREE.MeshStandardMaterial({color:'#aaa997',roughness:.94,metalness:.02});
+  const skin = new THREE.MeshStandardMaterial({color:'#c6b0e7',roughness:.94,metalness:.02});
   // Object-space detail stays attached to the sculpture as it moves.
   skin.onBeforeCompile=shader=>{
     shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 mossPosition;');
@@ -48,8 +48,8 @@ if (renderer) {
       float mossPatch=mossNoise(mossPosition*2.8)*.65+mossNoise(mossPosition*8.)*.35;
       float grain=mossNoise(mossPosition*95.);
       float bark=pow(.5+.5*sin(mossPosition.y*53.+mossNoise(mossPosition*5.)*12.),5.);
-      vec3 barkColor=mix(vec3(.12,.09,.15),vec3(.30,.25,.34),bark);
-      vec3 mossColor=mix(vec3(.10,.15,.045),vec3(.36,.43,.14),grain);
+      vec3 barkColor=mix(vec3(.16,.07,.28),vec3(.40,.22,.56),bark);
+      vec3 mossColor=mix(vec3(.25,.10,.40),vec3(.57,.32,.80),grain);
       diffuseColor.rgb*=mix(barkColor,mossColor,smoothstep(.43,.62,mossPatch));
       diffuseColor.rgb*=.65+grain*.6;
     `);
