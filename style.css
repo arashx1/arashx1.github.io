@@ -4086,7 +4086,7 @@ body:has(dialog[open]) .dragon-backdrop{opacity:.15}
 /* Impeccable polish: keep the purple world coherent while giving every control a clear, tactile state. */
 body{background:#110c19;color:var(--paper);overflow-x:hidden}
 .spectral-drape{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#0b0811}
-.spectral-drape canvas{display:block;width:100%;height:100%;opacity:.78;mix-blend-mode:screen}
+.spectral-drape canvas{display:block;width:100%;height:100%;opacity:.96;mix-blend-mode:screen}
 main{position:relative;z-index:1}
 .hero{background:linear-gradient(90deg,#120b1cf5 0%,#1c1230d9 38%,#120b1c22 74%)}
 .section,.about,.playground,.contact,.process-story{background-color:#120c1dd9}
