@@ -59,8 +59,8 @@ function draw(time) {
     const y = v * height + lift * height * 0.7 + Math.sin(u * 4 + drift) * height * 0.06;
     const depth = 0.62 + (Math.sin(u * 7 - v * 4 + drift) + 1) * 0.19;
     const distance = Math.hypot(x - centerX, y - centerY) / Math.max(width, height);
-    const alpha = Math.max(0.025, (1 - distance * 1.15) * depth * 0.32);
-    const size = 0.7 + depth * 1.25 + Math.sin(time * 0.0015 + dot.seed * 8) * 0.22;
+    const alpha = Math.max(0.07, (1 - distance * 1.15) * depth * 0.62);
+    const size = 0.95 + depth * 1.55 + Math.sin(time * 0.0015 + dot.seed * 8) * 0.28;
     const highlight = Math.max(0, 1 - distance * 3.2);
     const red = Math.round(112 + highlight * 90);
     context.fillStyle = `rgba(${red}, ${Math.round(62 + highlight * 72)}, 210, ${alpha})`;
